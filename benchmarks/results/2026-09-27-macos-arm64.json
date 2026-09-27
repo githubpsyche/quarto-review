@@ -1,0 +1,29 @@
+{
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "python": "3.12.14",
+  "words": 50000,
+  "comment_threads": 500,
+  "automatic_changes": 100,
+  "cold_prepare_seconds": 0.9990521250292659,
+  "cold_finish_seconds": 0.10892237490043044,
+  "cached_prepare_median_seconds": 0.5267947921529412,
+  "cached_finish_median_seconds": 0.1084380829706788,
+  "cold_review_overhead_seconds": 1.1079744999296963,
+  "cached_review_overhead_seconds": 0.63523287512362,
+  "ordinary_pandoc_render_seconds_excluded": 0.28097079205326736,
+  "quarto_version": "1.8.27",
+  "paired_plain_render_seconds": [
+    4.183589540887624,
+    3.5019949581474066,
+    3.551766957854852,
+    3.6152571658603847
+  ],
+  "paired_review_render_seconds": [
+    5.319659583037719,
+    5.0220133329275995,
+    5.078549042111263,
+    4.9291321251075715
+  ],
+  "full_cold_added_seconds": 1.136070042150095,
+  "full_cached_added_seconds": 1.4702463750727475
+}

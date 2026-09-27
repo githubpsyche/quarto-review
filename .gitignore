@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+.DS_Store
+.quarto/
+.review-cache/
+.playwright-cli/
+work/
+tools/**/bin/
+tools/**/obj/
+examples/**/_output/
+examples/**/review/exchanges/
+.venv-dev/

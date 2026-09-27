@@ -1,0 +1,25 @@
+---
+title: Single-source review example
+author: Example Author
+review:
+  schema: 2
+  author: EA
+  authors:
+    EA: Example Author
+    RA: Reviewer A
+    RB: Reviewer B
+---
+
+
+The study found []{#c1-start}a {~~large~>modest~~}{#s1 by=RA at=2026-09-27T09:00:00Z} []{#c2-start}difference[]{#c1-end} between conditions[]{#c2-end}.
+Both groups completed the task.
+
+<!-- Review discussions; their position does not determine their anchors. -->
+
+:::: {.review-thread #c1 by=RA at=2026-09-27T09:01:00Z}
+Please qualify the description of the effect size.
+::::
+
+:::: {.review-thread #c2 by=RB at=2026-09-27T09:02:00Z}
+Which two conditions were compared?
+::::

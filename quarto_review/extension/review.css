@@ -1,0 +1,147 @@
+/* All rules are scoped to review UI or review annotations. The host Quarto
+   format retains control of manuscript fonts, headings, spacing and width. */
+.qr-controls, .qr-context-panel, .qr-inline-comments, .qr-panel, .qr-restore-review {
+  --qr-border: var(--bs-border-color, #89939f);
+  --qr-accent: var(--bs-link-color, #28639a);
+  color: var(--bs-body-color, inherit);
+  font-family: system-ui, sans-serif;
+  font-size: .875rem;
+  line-height: 1.5;
+  text-align: left;
+  text-indent: 0;
+}
+.qr-controls {
+  position: sticky;
+  top: .5rem;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: .5rem .75rem;
+  padding: .6rem .75rem;
+  background: var(--bs-body-bg, Canvas);
+  box-shadow: 0 .15rem .6rem #00000012;
+  overflow-anchor: none;
+  border: 1px solid var(--qr-border);
+  border-radius: .4rem;
+  margin: 1rem 0;
+}
+.qr-controls label { display: grid; gap: .2rem; min-width: 0; }
+.qr-controls-external { box-sizing: border-box; flex-shrink: 0; }
+.qr-controls select { width: 100%; min-width: 0; }
+.qr-controls #qr-count { font-size: .75rem; align-self: center; }
+.qr-toolbar-heading { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; }
+.qr-toolbar-heading > strong { margin-right: auto; }
+.qr-dock-heading { display: flex; align-items: start; gap: .75rem; margin-bottom: .5rem; }
+.qr-dock-heading > h2 { flex: 1; }
+.qr-restore-review {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 40;
+  border-radius: 2rem !important;
+  padding: .5rem .9rem !important;
+  box-shadow: 0 .15rem .8rem #00000026;
+}
+.qr-controls select, .qr-controls button, .qr-context-panel button, .qr-restore-review {
+  font: inherit;
+  color: inherit;
+  background: var(--bs-body-bg, Canvas);
+  border: 1px solid var(--qr-border);
+  border-radius: .25rem;
+  padding: .3rem .5rem;
+}
+.qr-controls select:focus-visible, .qr-controls button:focus-visible,
+.qr-context-panel button:focus-visible, .qr-link:focus-visible, .qr-restore-review:focus-visible {
+  outline: 2px solid var(--qr-accent);
+  outline-offset: 2px;
+}
+.qr-panel { margin: 2rem 0; padding: 1rem 0; }
+.qr-panel h2, .qr-context-panel h2 {
+  font: 600 1rem/1.4 system-ui, sans-serif;
+  text-align: left;
+  text-indent: 0;
+  border: 0;
+  padding: 0;
+  margin: 0 0 .5rem;
+}
+.qr-panel p, .qr-context-panel p, .qr-inline-comments p {
+  font: inherit;
+  text-indent: 0;
+  line-height: 1.5;
+  margin: .5rem 0;
+}
+.qr-index > summary { cursor: pointer; font-weight: 600; margin-bottom: 1rem; }
+.qr-thread, .qr-suggestion { border-top: 1px solid var(--qr-border); padding: 1rem 0; }
+.qr-thread header, .qr-card header { font: 600 .85rem/1.5 system-ui, sans-serif; }
+.qr-thread time, .qr-card time { font-size: .75rem; opacity: .75; }
+.qr-body { overflow-wrap: anywhere; }
+.qr-body-plain { white-space: pre-wrap; }
+.qr-body > :first-child { margin-top: 0; }
+.qr-body > :last-child { margin-bottom: 0; }
+.qr-body pre { white-space: pre-wrap; }
+.qr-body h1, .qr-body h2, .qr-body h3, .qr-body h4, .qr-body h5, .qr-body h6 { font-size: 1em; }
+.qr-reply { border-left: .15rem solid var(--qr-border); padding-left: .75rem; margin: .75rem 0 0 .25rem; }
+.qr-context-panel {
+  position: fixed;
+  top: 1rem;
+  max-height: calc(100dvh - 2rem);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  box-sizing: border-box;
+  padding: .8rem;
+  background: var(--bs-body-bg, Canvas);
+  border: 1px solid var(--qr-border);
+  border-radius: .5rem;
+  box-shadow: 0 .2rem 1rem #0000000d;
+}
+.qr-context-panel > nav { display: flex; gap: .5rem; padding: .25rem 0 .6rem; }
+.qr-context-panel .qr-context-hint { font-size: .75rem; line-height: 1.4; margin: 0 0 .5rem; opacity: .8; }
+.qr-context-content { overflow-y: auto; overscroll-behavior: contain; min-height: 0; scrollbar-gutter: stable; }
+.qr-card { padding: .75rem .25rem; border-top: 1px solid var(--qr-border); }
+.qr-card .qr-context-quote {
+  color: inherit;
+  background: color-mix(in srgb, var(--qr-accent) 7%, transparent);
+  border: 0;
+  border-left: 2px solid var(--qr-accent);
+  padding: .45rem .65rem;
+  margin: .5rem 0;
+  font: inherit;
+  font-size: .8rem;
+  line-height: 1.4;
+  font-style: normal;
+  text-indent: 0;
+}
+.qr-inline-comments { border-left: .2rem solid var(--qr-accent); padding: 0 .8rem; margin: .75rem 0 1.25rem; }
+.qr-controls[hidden], .qr-restore-review[hidden], .qr-panel[hidden], .qr-context-panel[hidden], .qr-inline-comments[hidden], .qr-thread[hidden], .qr-suggestion[hidden] { display: none !important; }
+.qr-insert { background: #e0f3e5; color: #143e22; text-decoration: underline; }
+.qr-delete { background: #fde6e3; color: #762319; text-decoration: line-through; }
+.qr-comment { border-bottom: .15rem solid #c58f21; }
+.qr-boundary { scroll-margin-top: 5rem; }
+.qr-boundary-block { height: 0; line-height: 0; margin: 0; padding: 0; }
+.qr-link { font-size: .7em; vertical-align: super; margin-left: .15em; text-decoration: none; }
+.qr-filtered { opacity: .35; }
+body[data-review-view="proposed"] .qr-delete,
+body[data-review-view="original"] .qr-insert,
+body[data-review-view="proposed"] .qr-delete-block,
+body[data-review-view="original"] .qr-insert-block { display: none !important; }
+body[data-review-view="proposed"] .qr-insert,
+body[data-review-view="original"] .qr-delete { background: inherit; color: inherit; text-decoration: none; }
+body[data-review-controls-visible="true"] :is(main, #title-block-header) :is(section[id], #abstract, h1[id], h2[id], h3[id], h4[id], h5[id], h6[id], .qr-boundary) {
+  scroll-margin-top: var(--qr-scroll-offset, 12rem);
+}
+body[data-review-comments-visible="false"] .qr-link,
+body[data-review-comments-visible="false"] .qr-annotation-only-block { display: none !important; }
+body[data-review-comments-visible="false"] .qr-comment { border-bottom: 0; }
+body[data-review-clean="true"] .qr-filtered { opacity: 1; }
+body[data-review-clean="true"] .qr-delete-only { display: none !important; }
+@media (max-width: 575px) {
+  .qr-controls { font-size: .75rem; gap: .4rem; }
+  .qr-toolbar-heading { gap: .3rem; }
+  .qr-controls select, .qr-controls button { padding: .25rem .35rem; }
+}
+@media print {
+  .qr-controls, .qr-restore-review, .qr-link, .qr-context-panel, .qr-inline-comments { display: none !important; }
+  .qr-panel { break-before: page; }
+}

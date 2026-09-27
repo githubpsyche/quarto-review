@@ -1,0 +1,230 @@
+---
+title: Review a manuscript without losing the conversation
+subtitle: An interactive walkthrough of quarto-review
+author: Quarto review contributors
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Alex Author
+    R: Robin Reviewer
+    M: Morgan Reviewer
+---
+
+This document is both a working example and a guided tour.
+Its suggestions, comments and replies are real review annotations rendered by the extension.
+The study, people and results below are fictional.
+
+[Download the Word example](index.docx) · [Download the editable example](downloads/walkthrough.zip) · [View the project on GitHub](https://github.com/githubpsyche/quarto-review)
+
+## Start with the controls
+
+Use the **Review** controls above to explore this manuscript.
+These controls stay available as you scroll.
+
+1. Switch **Text view** between **Redline**, **Original** and **Proposed** to compare pending wording.
+2. Hover over a marked passage, select its comment label, or use **Next comment** to read the discussion beside the text.
+3. Choose **Reading view** to hide controls, comments and markup; **Show review** brings them back.
+
+On narrow screens, comments appear next to their passages in the document flow.
+The page is a read-only review: changing a view or filter does not accept an edit or change anyone's comments.
+The final section shows how to make and save those changes locally.
+
+## Compare suggested wording
+
+The study found [a {~~large~>modest~~}{#s1 by=R at=2026-09-01T09:00:00Z} difference in recall]{#c1}.
+Participants remembered more words after spaced practice{++ than after massed practice++}{#s2 by=M at=2026-09-01T09:05:00Z}.
+The result was {--very --}{#s3 by=R at=2026-09-01T09:10:00Z}consistent across the two lists.
+
+**Try it:** switch to **Original**, then **Proposed**.
+The replacement, insertion and deletion above are pending, so all three respond to that choice.
+The comment on the first sentence explains the replacement and includes a reply.
+
+To propose a replacement in the source, use CriticMarkup with a stable ID and an author alias:
+
+~~~markdown
+The study found a {~~large~>modest~~}{#s1 by=R} difference in recall.
+~~~
+
+The review.authors mapping in the document's front matter defines each alias once.
+Names and dates remain attached to individual suggestions and messages.
+
+## Follow comments and replies
+
+Participants completed []{#c2-start}two practice sessions []{#c3-start}one week apart[]{#c2-end}, followed by a delayed recall test[]{#c3-end}.
+The [recruitment target was 40 participants]{#c4}.
+
+**Try it:** inspect the two overlapping comments on the first sentence.
+One asks about the sessions; the other asks about timing.
+Each retains its own passage even though the ranges overlap.
+Robin's thread also includes a reply to Alex's reply.
+
+The recruitment comment is already **resolved**.
+Use the **Status** filter to find resolved discussions, then return to **All statuses**.
+Use **Author** to focus on a reviewer; threads also match their reply participants.
+**Hide comments** and **Hide controls** work independently.
+
+For an ordinary comment, put a short range marker in the prose and its discussion elsewhere in the same QMD file:
+
+~~~markdown
+The [recruitment target was 40 participants]{#c4}.
+
+:::: {.review-thread #c4 by=M .resolved}
+Is this the planned or final sample?
+
+::: {.reply #r4 by=A}
+The planned sample; I have made that explicit.
+:::
+::::
+~~~
+
+Moving the discussion block does not move the comment's anchor.
+Overlapping comments use explicit start and end markers, as demonstrated in the downloadable source.
+
+## See ordinary edits too
+
+Participants completed a five-minute practice session before the task.
+
+This sentence was edited directly in index.qmd without adding CriticMarkup.
+The frozen reference.qmd still says, “Participants completed a short practice session.”
+Their comparison supplies the visible suggestion automatically.
+Try the two text views to inspect that difference.
+
+Keep editing index.qmd during a review round and leave reference.qmd frozen.
+Changes to replies or comment status do not create manuscript wording changes.
+To give an automatically detected edit a persistent decision, use its ID from the feedback command; the extension records it explicitly in the source.
+
+## Recognise decisions already made
+
+The task was {~~hard~>demanding~~}{#s4 by=R .accepted}.
+The finding {~~suggests~>proves~~}{#s5 by=M .rejected} that spacing may improve recall.
+
+The first suggestion was **accepted**; the second was **rejected**.
+Both text views therefore show “demanding” and “suggests”.
+The alternatives and their attribution remain in the source for review history.
+The **Full review index** at the end of the page lists suggestions and their current decisions.
+
+Comment resolution and suggestion acceptance are separate actions.
+Resolving a discussion does not accept a nearby wording change.
+Reopening it brings the discussion back without undoing text decisions.
+
+## Keep feedback readable
+
+[The reporting checklist includes the estimate, its uncertainty and the sample size]{#c5}.
+A colleague also asked us to [retain a literal notation example]{#c6}.
+
+The checklist comment demonstrates **emphasis**, a list, a link and inline code inside a discussion.
+The notation comment demonstrates plain text: its asterisks and brackets are deliberately literal.
+Imported Word comments retain that literal interpretation by default, so formatting characters do not silently change their meaning.
+
+This example uses Quarto's standard manuscript layout.
+Layout and output formats still belong in the project's _quarto.yml; review controls sit alongside them.
+Installed manuscript formats, including APAQuarto, can be selected there.
+
+## Work on your own copy {#work-locally}
+
+Download and unzip the [editable example](downloads/walkthrough.zip).
+It contains the working index.qmd, frozen reference.qmd, presentation settings and a short setup guide.
+With Quarto and Python 3.12 or later installed, run these commands from that folder:
+
+~~~sh
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git
+quarto-review enable
+quarto preview index.qmd --to html
+~~~
+
+On Windows, activate the environment with .venv\Scripts\Activate.ps1 in PowerShell.
+Change the QMD and let the HTML preview refresh while you work.
+You can also use the review commands:
+
+~~~sh
+quarto-review feedback --id c1
+quarto-review reply c1 --body "I agree with the revised description."
+quarto-review resolve c1
+quarto-review reopen c1
+quarto-review accept s1
+quarto-review reject s2
+~~~
+
+Each command updates the working QMD while leaving the reference frozen.
+The delete-comment command removes a whole discussion and its range markers while preserving the manuscript wording.
+Use it only when you mean to remove the discussion.
+
+When ready to share a Word draft, render it explicitly:
+
+~~~sh
+quarto render index.qmd --to docx
+~~~
+
+The [Word example](index.docx) contains native comments, replies and pending tracked changes generated from this same document.
+HTML views and filters do not change what is exported.
+Discussion Markdown currently retains its stored punctuation in Word rather than becoming native Word formatting.
+
+To start from a reviewed Word document, import it into a new directory:
+
+~~~sh
+quarto-review import-docx reviewed.docx --into candidate --author "Your Name"
+~~~
+
+Import preserves supported review records and archives the original Word file.
+Inspect a returned draft as a candidate alongside the version you sent; the single-source workflow does not automatically merge independently edited Word returns.
+See the [format guide](https://github.com/githubpsyche/quarto-review/blob/main/docs/single-source.md) and [tested compatibility](https://github.com/githubpsyche/quarto-review/blob/main/docs/status.md) for details.
+
+<!-- Discussion positions do not determine their anchors. -->
+
+:::: {.review-thread #c1 by=R at=2026-09-01T09:01:00Z}
+Could we say **modest** here?
+The estimate does not support “large”.
+
+- Keep the direction of the result.
+- Qualify its magnitude.
+
+::: {.reply #r1 by=A at=2026-09-01T10:00:00Z}
+Agreed.
+I have left the replacement pending so we can compare both versions.
+:::
+::::
+
+:::: {.review-thread #c2 by=R at=2026-09-01T09:15:00Z}
+Were the same word lists used in both sessions?
+
+::: {.reply #r2 by=A at=2026-09-01T10:05:00Z}
+No; each session used a different list.
+:::
+
+::: {.reply #r3 by=R at=2026-09-01T10:10:00Z to=r2}
+Thanks.
+Please include that distinction in the methods.
+:::
+::::
+
+:::: {.review-thread #c3 by=M at=2026-09-01T09:20:00Z}
+How long after the second practice session was the test?
+My range overlaps Robin's, but this is a separate question about timing.
+::::
+
+:::: {.review-thread #c4 by=M at=2026-09-01T09:25:00Z .resolved}
+Is this the planned or final sample?
+
+::: {.reply #r4 by=A at=2026-09-01T10:15:00Z}
+The planned sample; “recruitment target” makes that explicit.
+:::
+::::
+
+:::: {.review-thread #c5 by=M at=2026-09-01T09:30:00Z}
+Please include **all three**:
+
+1. The estimated difference.
+2. An uncertainty interval.
+3. The analysed sample size.
+
+Use `n` consistently for the sample size.
+See [working locally](#work-locally) to reply to this discussion.
+::::
+
+:::: {.review-thread #c6 by=R at=2026-09-01T09:35:00Z format=plain}
+Keep *asterisks*, _underscores_ and [brackets] exactly as written.
+This synthetic message demonstrates the literal format used for imported Word text.
+::::

@@ -1,0 +1,8 @@
+project:
+  type: default
+  render:
+    - index.qmd
+  output-dir: _output
+format:
+  html: default
+  docx: default

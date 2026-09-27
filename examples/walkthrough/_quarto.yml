@@ -1,0 +1,19 @@
+project:
+  type: manuscript
+  output-dir: _site
+  render:
+    - index.qmd
+  resources:
+    - downloads/**
+manuscript:
+  article: index.qmd
+  code-links: false
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: Walkthrough
+    number-sections: false
+    code-copy: true
+  docx: default
+lang: en

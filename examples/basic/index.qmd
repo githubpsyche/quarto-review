@@ -1,0 +1,17 @@
+---
+title: Manuscript review example
+author: Example Author
+format:
+  html: default
+  docx: default
+---
+
+This fictional passage demonstrates comments and suggested wording.
+
+The study compared two conditions. The observed difference was {~~large~>small~~}{#s1}.
+
+The planned replication will use {~~the same~>new~~}{#s2} materials.
+
+{==The result needs replication.==}{>>Explain what a replication would test.<<}{#c1}
+
+{==The two conditions used the same materials.==}{>>Keep this detail near the procedure.<<}{#c2}
