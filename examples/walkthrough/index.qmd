@@ -135,7 +135,7 @@ quarto-review enable
 quarto preview index.qmd --to html
 ~~~
 
-On Windows, activate the environment with .venv\Scripts\Activate.ps1 in PowerShell.
+On Windows, activate the environment with `.venv\Scripts\Activate.ps1` in PowerShell.
 Change the QMD and let the HTML preview refresh while you work.
 You can also use the review commands:
 
