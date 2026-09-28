@@ -1,0 +1,308 @@
+---
+title: Review panel fixture
+author: Example Author
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Example Author
+    R: Example Reviewer
+---
+
+# Opening
+
+A surviving paragraph before the removed section.
+
+{~~## Draft note
+
+This note is for the tutorial only.
+
+~>~~}{#deleted_note .accepted by=A at=2026-01-03T10:00:00Z}
+
+# Findings
+
+An [ordinary {~~strong~>modest~~}{#pending_word by=R} claim]{#c1}.
+
+The text {~~~>now includes this~~}{#accepted_insertion .accepted by=A} explanation.
+
+The {~~retained phrase~>~~}{#rejected_deletion .rejected by=R} remains.
+
+This sentence has {~~~>an unnecessary qualification~~}{#rejected_insertion .rejected by=R}no inserted phrase.
+
+A {~~[redundant]{#c3} ~>~~}{#pending_deletion by=R}word is still under review.
+
+{~~An old claim.~>A {~~small~>large~~}{#inner .rejected by=R} effect.~~}{#outer .accepted by=A}
+
+[Another passage]{#c2} has a resolved comment.
+
+# Reading interval
+
+This paragraph separates the opening comments from the end of the example.
+It gives the navigation checks room to distinguish preserving the current passage from jumping to the first review item.
+
+A reader can change which records are shown while staying at the same place in the document.
+The next and previous controls should then move relative to that place.
+
+The example uses invented material throughout.
+Its original and proposed readings are intentionally short enough to compare directly.
+
+The final paragraph provides some space below the last anchored passage.
+This lets the browser place that passage near the middle of the viewport during navigation checks.
+
+
+# More review passages
+
+## Example 1
+
+A [separate result numbered 1]{#list_c1} has {~~uncertain~>qualified~~}{#list_s1 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 2
+
+A [separate result numbered 2]{#list_c2} has {~~uncertain~>qualified~~}{#list_s2 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 3
+
+A [separate result numbered 3]{#list_c3} has {~~uncertain~>qualified~~}{#list_s3 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 4
+
+A [separate result numbered 4]{#list_c4} has {~~uncertain~>qualified~~}{#list_s4 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 5
+
+A [separate result numbered 5]{#list_c5} has {~~uncertain~>qualified~~}{#list_s5 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 6
+
+A [separate result numbered 6]{#list_c6} has {~~uncertain~>qualified~~}{#list_s6 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 7
+
+A [separate result numbered 7]{#list_c7} has {~~uncertain~>qualified~~}{#list_s7 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 8
+
+A [separate result numbered 8]{#list_c8} has {~~uncertain~>qualified~~}{#list_s8 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 9
+
+A [separate result numbered 9]{#list_c9} has {~~uncertain~>qualified~~}{#list_s9 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 10
+
+A [separate result numbered 10]{#list_c10} has {~~uncertain~>qualified~~}{#list_s10 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 11
+
+A [separate result numbered 11]{#list_c11} has {~~uncertain~>qualified~~}{#list_s11 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 12
+
+A [separate result numbered 12]{#list_c12} has {~~uncertain~>qualified~~}{#list_s12 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 13
+
+A [separate result numbered 13]{#list_c13} has {~~uncertain~>qualified~~}{#list_s13 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 14
+
+A [separate result numbered 14]{#list_c14} has {~~uncertain~>qualified~~}{#list_s14 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 15
+
+A [separate result numbered 15]{#list_c15} has {~~uncertain~>qualified~~}{#list_s15 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 16
+
+A [separate result numbered 16]{#list_c16} has {~~uncertain~>qualified~~}{#list_s16 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 17
+
+A [separate result numbered 17]{#list_c17} has {~~uncertain~>qualified~~}{#list_s17 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 18
+
+A [separate result numbered 18]{#list_c18} has {~~uncertain~>qualified~~}{#list_s18 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 19
+
+A [separate result numbered 19]{#list_c19} has {~~uncertain~>qualified~~}{#list_s19 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 20
+
+A [separate result numbered 20]{#list_c20} has {~~uncertain~>qualified~~}{#list_s20 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 21
+
+A [separate result numbered 21]{#list_c21} has {~~uncertain~>qualified~~}{#list_s21 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 22
+
+A [separate result numbered 22]{#list_c22} has {~~uncertain~>qualified~~}{#list_s22 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 23
+
+A [separate result numbered 23]{#list_c23} has {~~uncertain~>qualified~~}{#list_s23 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+## Example 24
+
+A [separate result numbered 24]{#list_c24} has {~~uncertain~>qualified~~}{#list_s24 by=A} evidence.
+This paragraph provides enough surrounding context to distinguish the item from other passages in the review list.
+Reading this example does not require looking at any real manuscript or collaborator feedback.
+
+:::: {.review-thread #c3 by=R}
+This comment is attached only to text proposed for deletion.
+::::
+
+:::: {.review-thread #c1 by=R}
+Explain the **claim**.
+
+::: {.reply #r1 by=A}
+The estimate is now qualified.
+:::
+::::
+
+:::: {.review-thread #c2 by=R .resolved}
+This is settled.
+::::
+:::: {.review-thread #list_c1 by=R}
+Clarify example 1, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c2 by=R}
+Clarify example 2, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c3 by=R}
+Clarify example 3, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c4 by=R}
+Clarify example 4, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c5 by=R}
+Clarify example 5, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c6 by=R}
+Clarify example 6, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c7 by=R}
+Clarify example 7, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c8 by=R}
+Clarify example 8, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c9 by=R}
+Clarify example 9, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c10 by=R}
+Clarify example 10, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c11 by=R}
+Clarify example 11, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c12 by=R}
+Clarify example 12, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c13 by=R}
+Clarify example 13, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c14 by=R}
+Clarify example 14, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c15 by=R}
+Clarify example 15, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c16 by=R}
+Clarify example 16, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c17 by=R}
+Clarify example 17, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c18 by=R}
+Clarify example 18, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c19 by=R}
+Clarify example 19, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c20 by=R}
+Clarify example 20, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c21 by=R}
+Clarify example 21, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c22 by=R}
+Clarify example 22, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c23 by=R}
+Clarify example 23, including the **relevant comparison**.
+::::
+
+:::: {.review-thread #list_c24 by=R}
+Clarify example 24, including the **relevant comparison**.
+::::

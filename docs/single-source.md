@@ -77,6 +77,11 @@ Deleted discussions remain absent from subsequent outputs, even when they exist 
 
 ## Suggestions and decisions
 
+Empty navigation anchors such as `[]{#ref-example .anchor}` are document structure, so adding, removing or renaming them does not create an automatic wording suggestion.
+The current anchor is retained in the output; nearby wording edits are still tracked.
+Anchor syntax shown literally in code and changes to visible links remain tracked.
+
+
 ~~~markdown
 The difference was {~~large~>modest~~}{#s1 by=R}.
 The replication was {++independent ++}{#s2 by=A}.
@@ -95,15 +100,41 @@ Changing a filter keeps the reader at the current passage; it does not jump to t
 When changes are nested, the outer card applies the inner decisions while each inner card retains its own alternatives.
 Native formatting and equation revisions with no separate text alternatives are identified as native Word changes and linked to their passage.
 
-Review defaults to Comments; choose Changes or Comments and changes to include suggestions.
-Status offers Open and Resolved for comments, and Pending, Accepted and Rejected for changes.
-Author and status filters select cards and location markers without fading the manuscript or changing its redline colours.
+The panel beside the passage has Previous, Next and Hide buttons above its review cards.
+Its List view shows every item matching the author, review-type and status filters, interleaved in manuscript order.
+The Review list toolbar button opens this view even when At passage uses inline cards on a narrow screen.
+Entries show nearby manuscript text, attribution and status; expanding an entry reveals its full discussion or change alternatives without scrolling the document.
+Previous and Next move within the list while this view is active.
+Go to passage switches to At passage and navigates to the anchor.
+Returning to List restores expanded entries and its independent scroll position.
+Hiding the review cards or entering Reading view hides the list as well.
+Review defaults to Comments and changes; Status defaults to Open comments + pending changes.
+The count includes only the selected review types and counts matches across the document, not just cards currently visible beside the text.
+Status options depend on Review: Open, Resolved or All statuses for comments; Pending, Accepted or rejected, Accepted, Rejected or All statuses for changes.
+With both types selected, Status offers Open comments + pending changes, Resolved comments + decided changes, and All statuses.
+Switching review type translates Open to Pending and Resolved to Accepted or rejected, or their combined equivalents.
+Accepted and Rejected broaden to the corresponding resolved or decided filter when changing type; switching back to Changes retains both decisions.
+All statuses remains selected across types.
+Pending changes can still appear when their associated comments are resolved.
+Combined options are display filters, not new source statuses.
+An incompatible status selection resets to All statuses when the review type changes.
+In Redline, choosing an author highlights only that author's pending changes.
+Other authors' pending insertions appear as ordinary proposed text and their deletions are hidden.
+Accepted and rejected decisions remain in force; filtering never changes them.
+Selecting All authors restores the complete redline.
+Original and Proposed always show the whole document in their selected reading, regardless of the author filter.
+Review and Status select cards and location markers without changing this text projection.
+The explanation below the controls identifies the active author and text view.
+When a comment spans changes, its excerpt compares the selected author's before and after readings against everyone else's proposed wording.
+Nested edits respect the surrounding edit: a change within another author's deleted passage remains inspectable in its card without restoring that passage.
 Hover over changed text or its Δ marker to see who suggested it, together with the change identifier and status.
 Overlapping changes retain each author in the tooltip, independently of the card filters.
 Comment excerpts show separate Original and Proposed readings in Redline view when they differ.
 Original and Proposed views quote only their corresponding reading; an empty reading is identified explicitly.
 These are display controls, not commands to accept or resolve anything.
-Hide review cards hides both discussions and suggestion cards; Reading view also hides the controls and attribution tooltips and displays clean proposed text.
+Hide controls and Hide review cards change only panel visibility, preserving the selected text view even when both panels are hidden.
+Reading view explicitly hides both panels and attribution tooltips and displays clean proposed text.
+Show review restores the panels and the previously selected text view.
 
 Comments are open by default.
 Add .resolved to the thread div to resolve it; removing that class reopens it.

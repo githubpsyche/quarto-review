@@ -1,16 +1,18 @@
-name: Publish walkthrough
+name: Check and publish guide
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: github-pages
-  cancel-in-progress: false
+  group: review-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       UV_PROJECT_ENVIRONMENT: .venv-dev
     steps:
@@ -18,18 +20,37 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
       - run: uv sync --locked
-      - name: Check extension regressions
-        run: uv run pytest -q -m 'not private'
-      - name: Build and verify walkthrough
+      - name: Check Python and source regressions
+        run: |
+          uv run ruff check quarto_review tests tools benchmarks
+          uv run pytest -q -m 'not private'
+      - name: Check browser interactions
+        run: |
+          npm ci
+          npx --no-install playwright install --with-deps chromium
+          uv run python tools/run_browser_checks.py
+      - name: Check explicit review round
+        run: uv run python tools/check_review_round.py --output work/release-round
+      - name: Check installed wheel
+        run: |
+          uv build --wheel
+          uv run python tools/check_package.py dist/*.whl
+      - name: Build and verify guide
         run: uv run python tools/build_demo.py
       - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           path: dist/demo
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -40,5 +61,5 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v5
+        id: deployment

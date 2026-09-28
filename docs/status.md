@@ -5,10 +5,19 @@
 The single-source format is implemented with compact spans, crossing ranges, author aliases, Markdown thread blocks and inline suggestion decisions.
 Tests cover source-only operations, deletion without removing prose, concurrent-write rejection, comment movement without prose changes, loss-checked candidate conversion, native Word import, HTML/Word output and executed references.
 The full non-private regression suite also exercises the existing converter and schema-1 compatibility.
-The discussion-formatting regression run passed 148 tests with four optional checks skipped and four private checks deselected.
+The current candidate is version 0.2.1; package, Python module and Quarto extension version declarations agree.
 Focused checks also verify that opting an imported message into Markdown survives later review operations.
-No live manuscript was migrated or rendered to validate schema 2.
+The reproducible checks, recorded local results and remaining release gate are in [release checks](release.md).
 An interactive Word application cycle has not yet been repeated specifically for schema 2.
+
+| Current schema-2 capability | Evidence and boundary |
+| --- | --- |
+| Source operations and comparison | Automated tests cover text, ranges, decisions, attribution and unchanged references. Saving detects earlier changes but does not lock simultaneous writers. |
+| HTML review | Automated synthetic browser checks cover filters, matching state transitions, lists, navigation, author focus, media, keyboard access and reading-view restoration. |
+| Word import and export | Automated package, relationship, identity and content checks; not a replacement for opening and saving in Word. |
+| Returned feedback | Separate candidate import and a worked explicit reconciliation example retaining newer local edits. No automatic schema-2 receive/merge. |
+| Installed package | A disposable wheel installation renders HTML and Word; the check rejects accidental imports from the development checkout. |
+| Platform coverage | Development checks on macOS; CI is configured for Ubuntu. Windows and R execution are not established by these checks. |
 
 HTML discussions render basic CommonMark in a single conversion batch.
 Regression tests cover formatting, isolated message parsing, literal Word imports, reply and decision preservation, raw HTML, unsafe links and image suppression.
@@ -25,7 +34,10 @@ Word for Mac 16.113.2 on 27 September 2026: open, add a reply, resolve a thread,
 accept and reject replacements, save, import, render, reopen, and save again.
 This check does not establish compatibility with every Word version.
 
-## Tested behaviour
+## Historical schema-1 behaviour
+
+The following table and application findings document the older source format and native exporter.
+They do not establish automatic return reconciliation for schema 2.
 
 | Area | Evidence |
 | --- | --- |
@@ -94,6 +106,9 @@ thread. A repeated import added nothing, and the frozen reference stayed intact.
 
 ## Explicit limits
 
+References below to returned-file conflict detection describe the schema-1 reconciliation engine.
+Schema 2 imports a candidate; comparing it with the version sent and the latest working source remains an explicit user task.
+
 - Review annotations in YAML metadata, including a YAML title or abstract, are
   not supported. Rendering reports omitted annotations rather than dropping them.
   Keep reviewable manuscript passages in the body.
@@ -137,6 +152,9 @@ Review cards now support comments and changes, selected separately in the Review
 Accepted and rejected changes keep readable before/after text, authors and statuses in their cards while the manuscript retains its decided wording.
 Empty change ranges have visible location markers when changes are selected.
 Status filtering selects records without fading the manuscript's tracked-change colours.
+In Redline, author filtering additionally shows only the selected author’s pending edits, with other authors’ edits projected as proposed wording.
+This view preserves decisions, nested edits, figures and other media; Original and Proposed retain their full-document readings.
+A synthetic author-focus fixture verifies these behaviours, focused comment excerpts, navigation and restoration on wide and narrow screens.
 Nested decisions apply within the alternatives shown in a parent change card.
 Filtering preserves the current reading position, including when earlier inline cards disappear.
 Navigation follows the selected item or scrolled passage and is not reset by filters or stationary-pointer layout changes.

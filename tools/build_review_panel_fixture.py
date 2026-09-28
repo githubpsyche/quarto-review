@@ -1,5 +1,6 @@
 """Render the synthetic HTML-only fixture for review-panel interaction checks."""
 
+import argparse
 import subprocess
 from pathlib import Path
 
@@ -8,9 +9,15 @@ from quarto_review.quarto import enable
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    directory = root / "work/review-panel"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", default="tests/fixtures/review-panel.qmd")
+    parser.add_argument("--output", default="work/review-panel")
+    args = parser.parse_args()
+    directory = (root / args.output).resolve()
+    if not directory.is_relative_to(root / "work"):
+        parser.error("Fixture output must be inside this repository's work directory")
     directory.mkdir(parents=True, exist_ok=True)
-    source = (root / "tests/fixtures/review-panel.qmd").read_text()
+    source = (root / args.source).read_text()
     for name in ("index.qmd", "reference.qmd"):
         (directory / name).write_text(source)
     (directory / "_quarto.yml").write_text(

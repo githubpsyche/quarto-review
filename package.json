@@ -1,0 +1,8 @@
+{
+  "name": "quarto-review-checks",
+  "private": true,
+  "description": "Browser checks only; Node is not a manuscript runtime dependency.",
+  "devDependencies": {
+    "@playwright/cli": "0.1.21"
+  }
+}

@@ -1,0 +1,67 @@
+---
+title: Author focus fixture
+author: Example Author
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Example Author
+    R: Example Reviewer
+    O: Observer
+---
+
+# Author focus
+
+::: {#mixed}
+The [{~~strong~>modest~~}{#r_word by=R} claim has a {~~brief~>detailed~~}{#a_word by=A} explanation]{#c1}.
+:::
+
+::: {#nested}
+{~~Before {~~small~>large~~}{#inner_before by=R}.~>After {~~low~>high~~}{#inner_after by=R}.~~}{#outer by=A}
+:::
+
+::: {#deleted-block}
+{--A paragraph removed by the reviewer.--}{#r_delete by=R}
+:::
+
+::: {#inserted-block}
+{++A paragraph added by the reviewer.++}{#r_insert by=R}
+:::
+
+::: {#accepted}
+{~~Settled original.~>Accepted {~~soft~>firm~~}{#pending_child by=R} wording.~~}{#settled_parent .accepted by=A}
+:::
+
+::: {#rejected}
+{~~Retained wording.~>Rejected replacement.~~}{#rejected_parent .rejected by=R}
+:::
+
+::: {#formatting}
+[]{#format-start}A native formatting change.[]{#format-end}{~~~>~~}{#format by=R}<!-- review-data: {"provenance":{"kind":"rPrChange"}} -->
+:::
+
+::: {#final}
+The [final unchanged passage]{#c2} gives navigation a destination below the changes.
+:::
+
+# Reading interval
+
+This example uses synthetic wording and fictional reviewers.
+The extra paragraphs make it possible to test reading position at different screen widths.
+
+Author focus changes only the display.
+Every stored decision and attribution remains available.
+
+Returning to All authors restores the complete redline.
+The Original and Proposed readings remain available in every author selection.
+
+:::: {.review-thread #c1 by=R}
+Compare both revisions in this passage.
+::: {.reply #reply1 by=A}
+Both suggestions remain pending.
+:::
+::::
+
+:::: {.review-thread #c2 by=O}
+An observer with no suggestions.
+::::

@@ -28,7 +28,7 @@ local review caches; subsequent pairs provide the cached median.
 Run it with:
 
 ```sh
-uv run python benchmarks/review_processing.py
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python benchmarks/review_processing.py
 ```
 
 For diagnostic runs, `--paragraphs` changes the document size and `--pairs`

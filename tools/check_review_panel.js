@@ -7,7 +7,7 @@ async (page) => {
   const select = (name, value) => page.getByRole('combobox', {name, exact: true}).selectOption(value);
   const card = id => page.locator(`#qr-context-panel .qr-card[data-review-id="${id}"]`);
   const choose = async id => {
-    await page.locator(`.qr-link[data-qr-target="${id}"]`).click();
+    await page.locator(`.qr-link[data-qr-target="${id}"]:visible, .qr-change-target[data-review-ids~="${id}"]:visible`).first().click();
     await card(id).waitFor({state: 'visible'});
   };
   const frames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -22,11 +22,43 @@ async (page) => {
     return [style.color, style.backgroundColor, style.opacity];
   });
   const quote = id => page.locator(`#qr-context-panel .qr-card[data-review-id="${id}"] .qr-context-quote`).innerText();
+  const checkVisibility = async orders => {
+    for (const textView of ['review', 'original', 'proposed']) {
+      await select('Text view', textView);
+      for (const order of orders) {
+        for (const control of order) await page.locator(control).click();
+        await frames();
+        assert(await page.locator('body').getAttribute('data-review-clean') === 'false', 'Hiding panels entered Reading view');
+        assert(await page.locator('body').getAttribute('data-review-view') === textView, 'Hiding panels changed ' + textView + ' text');
+        assert(!await page.locator('#qr-controls').isVisible(), 'Controls remain visible');
+        assert(await page.locator('.qr-card:visible').count() === 0, 'Hidden cards remain visible');
+        const deletion = page.locator('.qr-mark.qr-delete[data-review-ids~="pending_word"]').first();
+        assert(await deletion.isVisible() === (textView !== 'proposed'), 'Hiding panels changed deleted-text visibility');
+        assert(await page.locator('.qr-mark[title]').count() > 0, 'Hiding panels removed attribution');
+        await page.locator('#qr-restore-review').click();
+        assert(await page.locator('#qr-view').inputValue() === textView, 'Restore changed the selected text view');
+      }
+      await page.locator('#qr-reading-view').click();
+      assert(await page.locator('body').getAttribute('data-review-clean') === 'true', 'Explicit Reading view is not clean');
+      assert(await page.locator('body').getAttribute('data-review-view') === 'proposed', 'Reading view is not proposed text');
+      assert(await page.locator('.qr-mark[title]').count() === 0, 'Reading view retains attribution');
+      await page.locator('#qr-restore-review').click();
+      assert(await page.locator('body').getAttribute('data-review-clean') === 'false', 'Restore did not leave Reading view');
+      assert(await page.locator('body').getAttribute('data-review-view') === textView, 'Reading view restore lost ' + textView);
+    }
+    await select('Text view', 'review');
+  };
   await page.setViewportSize({width: 1600, height: 1000});
   await page.reload();
   await page.locator('#qr-kind').waitFor();
   await page.waitForFunction(() => document.body.dataset.reviewComments === 'margin');
-  await checkCount('3 comments, 0 changes shown');
+  await checkVisibility([['#qr-toggle-comments', '#qr-hide-controls'], ['#qr-hide-controls', '#qr-hide-comments']]);
+  assert(await page.locator('#qr-kind').inputValue() === '', 'Default review omits changes');
+  assert(await page.locator('#qr-status').inputValue() === 'open-pending', 'Default status includes decided records');
+  await checkCount('2 comments, 2 changes');
+  await select('Status', '');
+  await checkCount('3 comments, 8 changes');
+  await select('Review', 'comment');
   await choose('c1');
   const excerpt = await quote('c1');
   assert(excerpt.includes('Original: ordinary strong claim') && excerpt.includes('Proposed: ordinary modest claim'), 'Replacement excerpt does not distinguish its alternatives');
@@ -43,15 +75,15 @@ async (page) => {
   await select('Text view', 'review');
   const before = await colour();
   await stationaryFilter('Status', 'open');
-  await checkCount('2 comments, 0 changes shown');
+  await checkCount('2 comments');
   assert(JSON.stringify(await colour()) === JSON.stringify(before), 'Comment filter changed tracked-text colour');
   const changedText = page.locator('.qr-mark.qr-insert[data-review-ids~="pending_word"]');
   await changedText.hover();
   assert((await changedText.getAttribute('title')).includes('Suggested by Example Reviewer (pending_word; pending)'), 'Hover attribution missing with comment filter active');
   await stationaryFilter('Review', 'suggestion');
-  await checkCount('0 comments, 8 changes shown');
+  await checkCount('2 changes');
   await stationaryFilter('Status', 'accepted');
-  await checkCount('0 comments, 3 changes shown');
+  await checkCount('3 changes');
   await choose('deleted_note');
   const deletion = await card('deleted_note').innerText();
   assert(deletion.includes('Accepted deletion') && deletion.includes('Draft note') && deletion.includes('This note is for the tutorial only.'), 'Deleted section not inspectable');
@@ -70,14 +102,14 @@ async (page) => {
   await card('deleted_note').waitFor({state: 'visible'});
   await choose('accepted_insertion');
   await stationaryFilter('Status', 'rejected');
-  await checkCount('0 comments, 3 changes shown');
+  await checkCount('3 changes');
   await page.locator('#qr-next').click();
   await card('rejected_deletion').waitFor({state: 'visible'});
   await page.locator('#qr-next').click();
   await card('rejected_insertion').waitFor({state: 'visible'});
   assert((await card('rejected_insertion').innerText()).includes('an unnecessary qualification'), 'Rejected insertion not inspectable');
   await stationaryFilter('Status', 'pending');
-  await checkCount('0 comments, 2 changes shown');
+  await checkCount('2 changes');
   assert(JSON.stringify(await colour()) === JSON.stringify(before), 'Change filter altered manuscript colours');
   await choose('pending_word');
   // Scrolling, rather than selecting a marker, must also update navigation.
@@ -90,7 +122,7 @@ async (page) => {
   await card('pending_word').waitFor({state: 'visible'});
   await stationaryFilter('Status', 'accepted');
   await stationaryFilter('Author', 'Example Reviewer');
-  await checkCount('0 comments, 0 changes shown');
+  await checkCount('0 changes');
   assert((await page.locator('#qr-context-panel').innerText()).includes('No review items match'), 'No-match state is unclear');
   await stationaryFilter('Author', '');
   await page.setViewportSize({width: 600, height: 900});
@@ -108,7 +140,7 @@ async (page) => {
   await select('Status', 'resolved');
   await frames();
   assert(Math.abs(await passageTop() - narrowTop) < 2, 'Narrow filter loses reading position when earlier cards disappear');
-  await checkCount('1 comment, 0 changes shown');
+  await checkCount('1 comment');
   await select('Review', 'suggestion');
   await select('Status', 'accepted');
   await page.locator('#qr-reading-view').click();
@@ -119,9 +151,10 @@ async (page) => {
   assert(!prose.includes('Draft note') && !prose.includes('an unnecessary qualification'), 'Reading view restored settled text');
   assert(prose.includes('ordinary modest claim') && !prose.includes('redundant'), 'Reading view is not proposed prose');
   await page.locator('#qr-restore-review').click();
-  await checkCount('0 comments, 3 changes shown');
+  await checkCount('3 changes');
   assert(await page.locator('.qr-inline-comments .qr-card[data-review-id="deleted_note"]').isVisible(), 'Restore lost accepted change cards');
   assert((await changedText.getAttribute('title')).includes('Example Reviewer'), 'Restore lost hover attribution');
+  await checkVisibility([['#qr-toggle-comments', '#qr-hide-controls']]);
   assert(errors.length === 0, 'Browser errors: ' + errors.join('; '));
-  console.log('PASS: coherent excerpts, nested decisions, hover attribution, stable redlines, settled cards, position-preserving filters, click/scroll navigation, narrow cards, Reading view and restoration.');
+  console.log('PASS: coherent excerpts, nested decisions, hover attribution, stable redlines, settled cards, position-preserving filters, click/scroll navigation, narrow cards, independent visibility in every text view, Reading view and restoration.');
 }

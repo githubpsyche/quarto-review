@@ -1,0 +1,104 @@
+async (page) => {
+  const mediaUrl = await page.evaluate(() => location.origin + "/tests/fixtures/review-media.html");
+  page.setDefaultTimeout(5000);
+  const failures = [];
+  const errors = [];
+  const reports = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const assert = (ok, message) => { if (!ok) failures.push(message); };
+  const select = (id, value) => page.locator(`#qr-${id}`).selectOption(value);
+  const frames = () => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const prose = id => page.locator(`#${id}`).evaluate(el => {
+    const copy = el.cloneNode(true);
+    const nodes = [el, ...el.querySelectorAll("*")];
+    const clones = [copy, ...copy.querySelectorAll("*")];
+    nodes.forEach((node, i) => {
+      if (getComputedStyle(node).display === "none" || node.matches(".qr-link,.qr-inline-comments")) clones[i].remove();
+    });
+    return copy.textContent.replace(/\s+/g, " ").trim();
+  });
+  const decorated = (id, side) => page.locator(`.qr-mark[data-review-ids~="${id}"].qr-${side}`).first().evaluate(el => {
+    const css = getComputedStyle(el);
+    return {colour: css.color, background: css.backgroundColor, decoration: css.textDecorationLine, hidden: css.display === "none"};
+  });
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  await page.setViewportSize({width:1600, height:1000});
+  await page.reload();
+  await page.locator('#qr-author-hint').waitFor();
+  const decisions = await page.locator('#quarto-review .qr-suggestion').evaluateAll(items => items.map(i => [i.dataset.reviewId, i.dataset.status, i.dataset.author]));
+  await select('kind','');
+  await select('view','original');
+  const original = await prose('mixed');
+  await select('view','proposed');
+  const proposed = await prose('mixed');
+  await select('view','review');
+  const reviewerColour = await decorated('r_word','insert');
+  const allAuthors = await prose('mixed');
+  for (const width of [1600,600]) {
+    await page.setViewportSize({width,height:1000});
+    await frames();
+    await select('author','Example Reviewer');
+    assert(await prose('mixed') === 'The strongmodest claim has a detailed explanation.', `${width}: reviewer redline / author proposed`);
+    assert(same(await decorated('r_word','insert'),reviewerColour), `${width}: selected author's colour changed`);
+    assert((await decorated('a_word','insert')).decoration === 'none', `${width}: other author's insertion is still highlighted`);
+    assert((await decorated('a_word','delete')).hidden, `${width}: other author's deleted wording remains`);
+    assert(await prose('nested') === 'After lowhigh.', `${width}: child in discarded parent branch leaked`);
+    assert(await prose('accepted') === 'Accepted softfirm wording.', `${width}: accepted parent lost pending child`);
+    assert(await prose('rejected') === 'Retained wording.', `${width}: rejected decision changed`);
+    await select('author','Example Author');
+    assert(await prose('mixed') === 'The modest claim has a briefdetailed explanation.', `${width}: author redline / reviewer proposed`);
+    assert(await prose('nested') === 'Before large.After high.', `${width}: nested other-author projections incorrect`);
+    assert(await prose('accepted') === 'Accepted firm wording.', `${width}: settled parent should not be redlined`);
+    assert(!await page.locator('#deleted-block p').isVisible(), `${width}: unselected deleted block leaves whitespace`);
+    assert((await prose('inserted-block')).includes('A paragraph added by the reviewer.'), `${width}: unselected insertion missing`);
+    await select('author','Example Reviewer');
+    await select('kind','comment');
+    await page.locator('.qr-link[data-qr-target="c1"]').click();
+    await frames();
+    const quote = await page.locator('.qr-card[data-review-id="c1"] .qr-context-quote:visible').innerText();
+    assert(quote.includes('Before Example Reviewer’s edits:') && quote.includes('strong claim has a detailed explanation'), `${width}: focused original excerpt incorrect`);
+    assert(quote.includes('With Example Reviewer’s edits:') && quote.includes('modest claim has a detailed explanation'), `${width}: focused proposed excerpt incorrect`);
+    await select('kind','suggestion');
+    await select('status','pending');
+    await page.locator('.qr-change-target[data-review-ids~="r_word"]').first().click();
+    await page.locator('#qr-next').click();
+    const cards = await page.locator('.qr-card:visible').evaluateAll(nodes=>nodes.map(n=>n.dataset.reviewId));
+    assert(cards.includes('inner_before') || cards.includes('inner_after'), `${width}: navigation skipped selected author's nested changes`);
+    const focused = await prose('mixed');
+    await page.locator('#qr-toggle-comments').click();
+    await page.locator('#qr-hide-controls').click();
+    assert(await prose('mixed') === focused, `${width}: hiding panels changed focused reading`);
+    await page.locator('#qr-restore-review').click();
+    await page.locator('#qr-reading-view').click();
+    assert(await prose('mixed') === proposed, `${width}: Reading view is not global proposed text`);
+    await page.locator('#qr-restore-review').click();
+    assert(await prose('mixed') === focused, `${width}: restore lost author focus`);
+    for (const [view, expected] of [['original',original],['proposed',proposed]]) {
+      await select('view',view);
+      assert(await prose('mixed') === expected, `${width}: author filter changes ${view}`);
+    }
+    await select('view','review');
+    await select('author','Observer');
+    assert(await prose('mixed') === proposed, `${width}: no-edit author is not clean proposed`);
+    assert(await page.locator('#qr-count').innerText() === '0 changes', `${width}: no-match count incorrect`);
+    await select('author','');
+    await select('status','');
+    assert(await prose('mixed') === allAuthors, `${width}: All authors did not restore complete redline`);
+    assert(same(await page.locator('#quarto-review .qr-suggestion').evaluateAll(items => items.map(i => [i.dataset.reviewId,i.dataset.status,i.dataset.author])), decisions), `${width}: review decisions or attribution changed`);
+    reports.push(`Author focus checks at ${width}px completed`);
+  }
+  await page.goto(mediaUrl);
+  await page.locator('#qr-author-hint').waitFor();
+  await select('author','Other');
+  assert(!await page.locator('#old-image').isVisible() && await page.locator('#new-image').isVisible(), 'Media: nonselected replacement is not proposed');
+  assert(!await page.locator('#deleted').isVisible(), 'Media: deleted-only block still displayed');
+  for (const id of ['inserted-image','picture-unit','svg-unit','math-unit','unchanged-image']) assert(await page.locator(`#${id}`).isVisible(), `Media: lost ${id}`);
+  assert(await page.locator('#new-image').evaluate(el=>el.closest('a').getAttribute('href')) === '#new', 'Media: link lost');
+  await select('author','Author');
+  assert(await page.locator('#old-image').isVisible() && await page.locator('#new-image').isVisible(), 'Media: selected author alternatives missing');
+  await page.getByRole('button',{name:'Run regression checks',exact:true}).click();
+  assert(await page.locator('#results').getAttribute('data-status') === 'passed', await page.locator('#results').innerText());
+  assert(!errors.length, errors.join('; '));
+  if (failures.length) throw new Error(failures.join('\n'));
+  return 'PASS: '+reports.join('; ')+'; nested changes, excerpts, navigation, decisions, views and media.';
+}

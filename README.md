@@ -60,10 +60,26 @@ Ordinary prose edits need no explicit markup: they are compared with the frozen 
 CriticMarkup is available when you want to control how a suggested replacement is presented.
 Read the [source-format guide](docs/single-source.md) for overlapping ranges, reply relationships, timestamps and native provenance.
 
-## Start a new project
+## Install and start
 
-Install Python 3.12 or later and Quarto.
-From an installed release, run:
+This checkout prepares version 0.2.1 as a development preview.
+There is no published 0.2.1 tag yet.
+Install Python 3.12 or later, Git and Quarto (tested with 1.8.27), then install the selected source checkout:
+
+~~~sh
+git clone https://github.com/githubpsyche/quarto-review.git
+cd quarto-review
+python -m venv .venv-user
+source .venv-user/bin/activate
+python -m pip install .
+~~~
+
+On Windows, activate with `.venv-user\Scripts\Activate.ps1` in PowerShell.
+Use `git checkout <commit-or-release-tag>` before installation to choose a reproducible version; an unpinned clone follows the current default branch.
+Keep the environment in place while its manuscript projects use it.
+See [installation, upgrades and removal](docs/installation.md) for project-local changes and moving a project.
+
+In a separate manuscript directory containing your existing index.qmd, run:
 
 ~~~sh
 quarto-review init --author "Example Author"
@@ -87,16 +103,19 @@ quarto render index.qmd --to docx
 
 Choose the manuscript style through the project's normal Quarto format settings, including installed APAQuarto formats.
 The extension provides review controls rather than replacing manuscript layout.
-HTML includes original, proposed and redline views, navigation through comments or changes, filters, margin cards and a clean reading view.
-Change cards retain before/after wording for accepted and rejected suggestions, including deletions that leave no manuscript text.
-Filters select review records without fading the redline text or jumping away from the current passage.
-Hover over a change to see who suggested it.
-Comment excerpts distinguish original and proposed wording when changes overlap the quoted passage.
-The HTML discussion is read-only; source commands make edits.
-Comments and replies render basic Markdown formatting, while imported Word feedback retains literal punctuation and line breaks.
-See [discussion syntax and output limits](docs/single-source.md#comments-and-ranges) for plain-text messages and Word export behaviour.
+HTML provides original, proposed and redline views, an independent review list, comments beside their passages, author filters and a clean reading view.
+The default shows open comments and pending changes.
+Discussion and before/after cards remain inspectable after decisions.
+The preview is read-only: edit and make decisions in the QMD or with the commands below.
+See the [source and HTML guide](docs/single-source.md#comments-and-ranges) for syntax, filters and output limits.
 
 ## Edit and discuss
+
+Comment status and change status answer different questions.
+An **open comment** still has a question, action or decision to address; a **pending change** awaits acceptance or rejection of its wording.
+After implementing and checking an agreed response, reply to the comment and resolve it, leaving its wording changes pending for collaborator review.
+Resolve comments recording completed work once that work has been checked; reopen a thread when further discussion or action is needed.
+Resolving a comment preserves its discussion and anchor and does not accept associated changes.
 
 ~~~sh
 quarto-review feedback
@@ -115,7 +134,8 @@ quarto-review validate
 
 These operations validate and atomically replace the one QMD source.
 Deleting a thread removes its messages and range references, while retaining manuscript text, suggestions and overlapping comments.
-Concurrent source changes cause the operation to stop rather than overwrite newer work.
+An edit detected before saving stops the operation.
+The check and replacement do not lock out another writer; use one writer at a time for each QMD.
 Rendered outputs and the reference are not authoritative copies to edit.
 
 Start a new review round explicitly:
@@ -141,6 +161,8 @@ quarto-review import-docx feedback.docx --into ../feedback-candidate --author "E
 This preserves native attribution and source identities.
 Returned Word feedback is reviewed against an explicitly selected prior version; schema 2 does not silently merge it into an active manuscript.
 The older automatic receive workflow remains specific to schema 1.
+Follow the [worked review round](docs/review-round.md) to retain the version sent, examine a returned candidate and apply explicit decisions without replacing newer local work.
+That example includes a reproducible scripted check; it does not establish compatibility with the Word application.
 
 Convert a schema-1 project and its frozen reference into a separate candidate:
 
@@ -162,10 +184,11 @@ UV_PROJECT_ENVIRONMENT=.venv-dev uv sync --locked
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run pytest -m "not private"
 ~~~
 
-Never repurpose the legacy .venv while it protects a pinned manuscript runtime.
-Development fixtures must stay separate from that manuscript.
+Keep development environments and synthetic fixtures separate from manuscript projects.
+Run the [release checks](docs/release.md) before distributing a candidate.
 See [status and limits](docs/status.md), [architecture](docs/design.md), and [performance](docs/performance.md).
-The historic interactive Word verification applies to the prior source format and exporter; the new format has separate automated tests.
+The historical interactive Word verification applies to schema 1.
+Current schema-2 automated checks and the remaining native Word check are listed separately in [compatibility evidence](docs/status.md).
 
 ## Public guide and examples
 

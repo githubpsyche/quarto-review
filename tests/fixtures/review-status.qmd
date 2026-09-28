@@ -1,0 +1,32 @@
+---
+title: Independent review states
+author: Example Author
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Example Author
+    R: Example Reviewer
+---
+
+# Review example
+
+An [ordinary {~~strong~>modest~~}{#s1 by=R} claim]{#c1}.
+
+[A separate claim needs clarification]{#c2}.
+
+The {~~old~>new~~}{#s2 .accepted by=A} wording is settled.
+
+The {~~original~>alternative~~}{#s3 .rejected by=R} wording is retained.
+
+:::: {.review-thread #c1 .resolved by=R}
+Please qualify the effect.
+
+::: {.reply #r1 by=A}
+I have proposed a more cautious description.
+:::
+::::
+
+:::: {.review-thread #c2 by=R}
+What supports this claim?
+::::

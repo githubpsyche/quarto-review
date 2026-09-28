@@ -9,6 +9,7 @@ import pytest
 from lxml import etree
 
 from quarto_review import pandoc
+from quarto_review.comparison import compare
 from quarto_review.errors import ReviewError
 from quarto_review.markup import parse
 from quarto_review.metadata import (
@@ -339,3 +340,51 @@ def test_new_reply_follows_existing_imported_reply(tmp_path):
         "First reply.",
         "Second reply.",
     ]
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("before_anchor", "after_anchor"),
+    [
+        ("", "[]{#ref-example .anchor}"),
+        ("[]{#previous .anchor}", "[]{#ref-example .anchor}"),
+        ("[]{#previous .anchor}", ""),
+    ],
+)
+def test_navigation_anchor_edits_preserve_word_review(
+    tmp_path, before_anchor, after_anchor
+):
+    metadata = ReviewMetadata("Writer", "2026-01-01T00:00:00Z")
+    metadata.suggestions["s1"] = SuggestionMetadata("Reviewer", metadata.created_at)
+    metadata.comments["c1"] = CommentMetadata(
+        "Reviewer", metadata.created_at, status="resolved",
+        replies=(Reply("r1", "Done.", "Writer", metadata.created_at, "c1"),),
+    )
+    prose = "A {=={~~old~>better~~}{#s1} claim==}{>>Explain.<<}{#c1}.\n\nA strong result.\n"
+    before = parse(before_anchor + prose)
+    after = parse(after_anchor + prose.replace("strong", "modest"))
+    result = compare(
+        after, before, metadata,
+        reference_id="test-round", date="2026-01-02T00:00:00Z",
+    )
+    prepared = prepare_render(result.document, result.metadata)
+    output = finish_document(
+        converted(prepared, tmp_path / "anchored.docx"), prepared, tmp_path
+    )
+    assert len(result.automatic_ids) == 1
+    assert validate_package(output)["threads"] == 1
+    root = output.xml("word/document.xml")
+    assert visible_text(root, "original") == "A old claim.\nA strong result.\n"
+    assert visible_text(root, "proposed") == "A better claim.\nA modest result.\n"
+    bookmarks = root.xpath(".//w:bookmarkStart/@w:name", namespaces=NS)
+    assert ("ref-example" in bookmarks) == bool(after_anchor)
+    assert "previous" not in bookmarks
+    review = read_review(output)
+    assert [(r.kind, r.text, r.author) for r in review.revisions] == [
+        ("del", "old", "Reviewer"), ("ins", "better", "Reviewer"),
+        ("del", "strong", "Writer"), ("ins", "modest", "Writer"),
+    ]
+    assert [c.text for c in review.comments] == ["Explain.", "Done."]
+    assert review.comments[0].resolved
+    assert review.comments[1].parent_id == review.comments[0].id
+    assert review.comments[0].anchors[0].text == "oldbetter claim"
