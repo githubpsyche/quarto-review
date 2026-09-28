@@ -87,7 +87,11 @@ quarto render index.qmd --to docx
 
 Choose the manuscript style through the project's normal Quarto format settings, including installed APAQuarto formats.
 The extension provides review controls rather than replacing manuscript layout.
-HTML includes original, proposed and redline views, comment navigation, filters, margin cards and a clean reading view.
+HTML includes original, proposed and redline views, navigation through comments or changes, filters, margin cards and a clean reading view.
+Change cards retain before/after wording for accepted and rejected suggestions, including deletions that leave no manuscript text.
+Filters select review records without fading the redline text or jumping away from the current passage.
+Hover over a change to see who suggested it.
+Comment excerpts distinguish original and proposed wording when changes overlap the quoted passage.
 The HTML discussion is read-only; source commands make edits.
 Comments and replies render basic Markdown formatting, while imported Word feedback retains literal punctuation and line breaks.
 See [discussion syntax and output limits](docs/single-source.md#comments-and-ranges) for plain-text messages and Word export behaviour.

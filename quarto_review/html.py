@@ -15,6 +15,10 @@ def review_panel(prepared: PreparedRender) -> str:
         messages[identifier] = prepared.comments[identifier], item.body_format
         for reply in item.replies:
             messages[reply.id] = reply.body, reply.body_format
+    for identifier, (before, after) in prepared.suggestions.items():
+        for side, text in (("before", before), ("after", after)):
+            if text:
+                messages[f"change:{identifier}:{side}"] = text, "markdown"
     bodies = render_messages(messages)
     authors = sorted(
         {item.author for item in prepared.metadata.comments.values() if item.author}
@@ -38,8 +42,9 @@ def review_panel(prepared: PreparedRender) -> str:
         '<nav class="qr-controls" aria-label="Review controls">',
         '<label>Text view <select id="qr-view"><option value="review">Redline</option><option value="proposed">Proposed</option><option value="original">Original</option></select></label>',
         f'<label>Author <select id="qr-author">{options}</select></label>',
-        '<label>Status <select id="qr-status"><option value="">All statuses</option><option value="open">Open</option><option value="resolved">Resolved</option><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option></select></label>',
-        '<button type="button" id="qr-previous">Previous comment</button><button type="button" id="qr-next">Next comment</button>',
+        '<label>Review <select id="qr-kind"><option value="comment">Comments</option><option value="suggestion">Changes</option><option value="">Comments and changes</option></select></label>',
+        '<label>Status <select id="qr-status"><option value="">All statuses</option><option value="open" data-kind="comment">Open</option><option value="resolved" data-kind="comment">Resolved</option><option value="pending" data-kind="suggestion">Pending</option><option value="accepted" data-kind="suggestion">Accepted</option><option value="rejected" data-kind="suggestion">Rejected</option></select></label>',
+        '<button type="button" id="qr-previous">Previous</button><button type="button" id="qr-next">Next</button>',
         '<span id="qr-count" role="status"></span></nav>',
         "<h2>Review comments</h2><p>Replies and decisions are made in the manuscript source or through the review commands.</p>",
     ]
@@ -57,10 +62,10 @@ def review_panel(prepared: PreparedRender) -> str:
             )
         )
         pieces.append(
-            f'<article class="qr-thread" id="qr-thread-{escape(identifier, quote=True)}" data-review-id="{escape(identifier, quote=True)}" data-author="{escape(participants, quote=True)}" data-status="{item.status}">'
+            f'<article class="qr-thread" id="qr-thread-{escape(identifier, quote=True)}" data-review-id="{escape(identifier, quote=True)}" data-kind="comment" data-author="{escape(participants, quote=True)}" data-status="{item.status}">'
         )
         pieces.append(
-            f'<header><a href="#qr-anchor-{escape(identifier, quote=True)}">{escape(identifier)}</a> · {escape(item.author or "Unattributed")} · <span class="qr-status">{item.status}</span></header>'
+            f'<header><a href="#qr-anchor-{escape(identifier, quote=True)}" data-qr-target="{escape(identifier, quote=True)}">{escape(identifier)}</a> · {escape(item.author or "Unattributed")} · <span class="qr-status">{item.status}</span></header>'
         )
         if item.date:
             pieces.append(f"<time>{escape(item.date)}</time>")
@@ -81,8 +86,30 @@ def review_panel(prepared: PreparedRender) -> str:
     }
     for identifier, item in prepared.metadata.suggestions.items():
         anchor = anchors.get(identifier, identifier)
+        before, after = prepared.suggestions.get(identifier, ("", ""))
+        if before or after:
+            kind = "replacement" if before and after else "deletion" if before else "insertion"
+        else:
+            kind = "native Word change"
+        title = f"{item.status.capitalize()} {kind}"
         pieces.append(
-            f'<article class="qr-suggestion" data-review-id="{escape(identifier, quote=True)}" data-anchor-id="{escape(anchor, quote=True)}" data-author="{escape(item.author or "", quote=True)}" data-status="{item.status}"><a href="#qr-anchor-{escape(anchor, quote=True)}">{escape(identifier)}</a> · {escape(item.author or "Unattributed")} · {item.status}</article>'
+            f'<article class="qr-suggestion" id="qr-suggestion-{escape(identifier, quote=True)}" data-kind="suggestion" data-review-id="{escape(identifier, quote=True)}" data-anchor-id="{escape(anchor, quote=True)}" data-author="{escape(item.author or "", quote=True)}" data-status="{item.status}">'
         )
+        pieces.append(
+            f'<header><a href="#qr-anchor-{escape(anchor, quote=True)}" data-qr-target="{escape(identifier, quote=True)}">{escape(title)}</a> · {escape(item.author or "Unattributed")}</header>'
+        )
+        pieces.append(f'<p class="qr-change-id">{escape(identifier)}</p>')
+        if item.date:
+            pieces.append(f'<time datetime="{escape(item.date, quote=True)}">Suggested {escape(item.date)}</time>')
+        for side, label, text in (("before", "Removed", before), ("after", "Added", after)):
+            if text:
+                pieces.append(
+                    f'<section class="qr-change-{side}"><h3>{label}</h3>'
+                    + bodies[f"change:{identifier}:{side}"]
+                    + "</section>"
+                )
+        if not before and not after:
+            pieces.append('<p class="qr-native-change">A formatting, equation or other native Word revision. Inspect its anchored passage; this record has no separate text alternatives.</p>')
+        pieces.append("</article>")
     pieces.append("</section>")
     return "\n".join(pieces)

@@ -292,7 +292,11 @@ quarto render index.qmd --to html
 ~~~
 
 In HTML, **Redline**, **Original** and **Proposed** compare pending wording.
-Marked passages open nearby discussions; author and status filters help focus the review.
+Review starts with Comments; select Changes to inspect suggestions, then filter their status to Pending, Accepted or Rejected.
+Change cards show removed and added wording alongside the author and decision.
+Previous and Next move through matching records, including accepted deletions and rejected insertions that leave no text in the manuscript.
+A Δ marker locates each change while changes are selected.
+Author and status filters affect the review cards without fading the manuscript's redline colours.
 **Reading view** hides markup, comments and controls, and **Show review** restores them.
 These are display choices and do not modify the QMD or exported Word draft.
 

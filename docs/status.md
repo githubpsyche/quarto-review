@@ -129,3 +129,20 @@ thread. A repeated import added nothing, and the frozen reference stayed intact.
 The source and archive are preserved when a case cannot be reconciled. A diagnostic
 is a request to make a concrete source decision, not a claim that the conversion
 completed successfully.
+
+
+## Inspecting settled suggestions in HTML
+
+Review cards now support comments and changes, selected separately in the Review control.
+Accepted and rejected changes keep readable before/after text, authors and statuses in their cards while the manuscript retains its decided wording.
+Empty change ranges have visible location markers when changes are selected.
+Status filtering selects records without fading the manuscript's tracked-change colours.
+Nested decisions apply within the alternatives shown in a parent change card.
+Filtering preserves the current reading position, including when earlier inline cards disappear.
+Navigation follows the selected item or scrolled passage and is not reset by filters or stationary-pointer layout changes.
+Hover attribution names the authors of overlapping changes independently of the card filters; Reading view hides these tooltips.
+Comment excerpts distinguish original and proposed readings and identify empty alternatives.
+On 28 September 2026, the public suite passed with 170 tests, 4 optional-runtime skips and 4 private tests deselected.
+Synthetic browser checks passed at desktop and narrow widths for these behaviours, accepted section deletion, rejected insertion, empty results and clean reading/restoration.
+Native formatting and equation revisions without separate text alternatives are described as native Word changes and linked to the corresponding passage.
+Their detailed Word formatting is not reconstructed in a text card.

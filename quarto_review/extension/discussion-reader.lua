@@ -12,7 +12,7 @@ function Reader(input)
         return node
       end
     })
-    blocks:insert(pandoc.Div(message.blocks, pandoc.Attr("message-" .. index)))
+    blocks:insert(pandoc.Div(message.blocks, pandoc.Attr("message-" .. index, {"qr-message"})))
   end
   return pandoc.Pandoc(blocks)
 end

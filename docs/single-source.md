@@ -86,6 +86,24 @@ Pending is implicit.
 Add .accepted or .rejected to a suggestion's attributes to record its disposition.
 Removing either class returns it to pending.
 Both wording alternatives remain available.
+HTML shows accepted wording as ordinary manuscript text and omits rejected wording.
+To inspect the retained decision, choose Changes under Review, then Accepted or Rejected under Status.
+Cards show the original and proposed text, author and status beside the passage.
+Accepted deletions and rejected insertions have a Δ location marker even when no text remains there.
+Previous and Next visit matching changes in manuscript order, starting from the selected item or current passage.
+Changing a filter keeps the reader at the current passage; it does not jump to the first match.
+When changes are nested, the outer card applies the inner decisions while each inner card retains its own alternatives.
+Native formatting and equation revisions with no separate text alternatives are identified as native Word changes and linked to their passage.
+
+Review defaults to Comments; choose Changes or Comments and changes to include suggestions.
+Status offers Open and Resolved for comments, and Pending, Accepted and Rejected for changes.
+Author and status filters select cards and location markers without fading the manuscript or changing its redline colours.
+Hover over changed text or its Δ marker to see who suggested it, together with the change identifier and status.
+Overlapping changes retain each author in the tooltip, independently of the card filters.
+Comment excerpts show separate Original and Proposed readings in Redline view when they differ.
+Original and Proposed views quote only their corresponding reading; an empty reading is identified explicitly.
+These are display controls, not commands to accept or resolve anything.
+Hide review cards hides both discussions and suggestion cards; Reading view also hides the controls and attribution tooltips and displays clean proposed text.
 
 Comments are open by default.
 Add .resolved to the thread div to resolve it; removing that class reopens it.

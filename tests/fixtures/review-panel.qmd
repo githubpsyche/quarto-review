@@ -1,0 +1,66 @@
+---
+title: Review panel fixture
+author: Example Author
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Example Author
+    R: Example Reviewer
+---
+
+# Opening
+
+A surviving paragraph before the removed section.
+
+{~~## Draft note
+
+This note is for the tutorial only.
+
+~>~~}{#deleted_note .accepted by=A at=2026-01-03T10:00:00Z}
+
+# Findings
+
+An [ordinary {~~strong~>modest~~}{#pending_word by=R} claim]{#c1}.
+
+The text {~~~>now includes this~~}{#accepted_insertion .accepted by=A} explanation.
+
+The {~~retained phrase~>~~}{#rejected_deletion .rejected by=R} remains.
+
+This sentence has {~~~>an unnecessary qualification~~}{#rejected_insertion .rejected by=R}no inserted phrase.
+
+A {~~[redundant]{#c3} ~>~~}{#pending_deletion by=R}word is still under review.
+
+{~~An old claim.~>A {~~small~>large~~}{#inner .rejected by=R} effect.~~}{#outer .accepted by=A}
+
+[Another passage]{#c2} has a resolved comment.
+
+# Reading interval
+
+This paragraph separates the opening comments from the end of the example.
+It gives the navigation checks room to distinguish preserving the current passage from jumping to the first review item.
+
+A reader can change which records are shown while staying at the same place in the document.
+The next and previous controls should then move relative to that place.
+
+The example uses invented material throughout.
+Its original and proposed readings are intentionally short enough to compare directly.
+
+The final paragraph provides some space below the last anchored passage.
+This lets the browser place that passage near the middle of the viewport during navigation checks.
+
+:::: {.review-thread #c3 by=R}
+This comment is attached only to text proposed for deletion.
+::::
+
+:::: {.review-thread #c1 by=R}
+Explain the **claim**.
+
+::: {.reply #r1 by=A}
+The estimate is now qualified.
+:::
+::::
+
+:::: {.review-thread #c2 by=R .resolved}
+This is settled.
+::::

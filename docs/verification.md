@@ -92,3 +92,33 @@ suites running. It checks the complete 50,000-word output and all 500 comments,
 then reports cold and cached review overhead. Record the raw result alongside
 the environment and interpret full-render differences as timing measurements
 with ordinary rendering variability.
+
+
+## Review-panel interaction regression
+
+The synthetic fixture in tests/fixtures/review-panel.qmd includes an accepted section deletion, an accepted insertion, rejected insertion and deletion, pending changes, an open thread with a reply, a deletion-only comment, a resolved thread, and an accepted replacement containing a rejected change.
+It contains no manuscript material.
+Build its HTML-only preview in the ignored work directory:
+
+```sh
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/build_review_panel_fixture.py
+python3 -m http.server 4321 --bind 127.0.0.1 --directory work/review-panel/_output
+```
+
+In a separate terminal with Playwright CLI available, open that page and run the reusable interaction checks:
+
+```sh
+playwright-cli -s=review-panel open http://127.0.0.1:4321/index.html
+playwright-cli -s=review-panel run-code "$(cat tools/check_review_panel.js)"
+playwright-cli -s=review-panel close
+```
+
+The check changes the actual controls at wide and narrow viewport sizes.
+It verifies coherent comment excerpts in all text views, nested decisions in cards, hover attribution for overlapping edits and empty markers, navigation after clicking or scrolling, and reading position when filters hide the selected item.
+It also checks narrow-screen position preservation as earlier cards disappear, comment/change counts, status and author filters, unchanged redline colours, no-match messages, Reading view and restoration.
+The builder verifies that rendering leaves both the source and frozen reference unchanged.
+The regular pytest suite separately checks safe Markdown rendering of change cards, native formatting descriptions and nested changes whose parent deletion has been accepted.
+A parameterized regression covers each combination of parent and child decision on both sides of a replacement.
+
+This check exercises the development copy only.
+Updating the extension in an active manuscript is a separate deployment step.

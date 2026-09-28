@@ -165,7 +165,7 @@ def test_migrated_plain_threads_and_new_markdown_replies_keep_state(tmp_path):
     prepared = prepare_render(loaded.documents["index.qmd"], loaded.metadata)
     before = asdict(loaded.metadata)
     panel = html.fragment_fromstring(review_panel(prepared))
-    bodies = panel.xpath('.//div[contains(concat(" ", @class, " "), " qr-body ")]')
+    bodies = panel.xpath('.//article[@class="qr-thread"]//div[contains(concat(" ", @class, " "), " qr-body ")]')
     assert bodies[0].text_content() == body
     assert bodies[1].text_content() == "**literal reply**"
     assert bodies[2].xpath(".//strong")[0].text == "formatted"
@@ -234,7 +234,7 @@ def test_word_import_punctuation_stays_literal_in_html(tmp_path, word_package):
     panel = html.fragment_fromstring(
         review_panel(prepare_render(project.documents["index.qmd"], project.metadata))
     )
-    bodies = panel.xpath('.//div[contains(concat(" ", @class, " "), " qr-body ")]')
+    bodies = panel.xpath('.//article[@class="qr-thread"]//div[contains(concat(" ", @class, " "), " qr-body ")]')
     assert len(bodies) == len(comments)
     assert {node.text_content() for node in bodies} == {comments[0].text}
     assert not panel.xpath(

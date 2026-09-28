@@ -73,8 +73,8 @@
 }
 .qr-index > summary { cursor: pointer; font-weight: 600; margin-bottom: 1rem; }
 .qr-thread, .qr-suggestion { border-top: 1px solid var(--qr-border); padding: 1rem 0; }
-.qr-thread header, .qr-card header { font: 600 .85rem/1.5 system-ui, sans-serif; }
-.qr-thread time, .qr-card time { font-size: .75rem; opacity: .75; }
+.qr-thread header, .qr-suggestion header, .qr-card header { font: 600 .85rem/1.5 system-ui, sans-serif; }
+.qr-thread time, .qr-suggestion time, .qr-card time { font-size: .75rem; opacity: .75; }
 .qr-body { overflow-wrap: anywhere; }
 .qr-body-plain { white-space: pre-wrap; }
 .qr-body > :first-child { margin-top: 0; }
@@ -121,7 +121,15 @@
 .qr-boundary { scroll-margin-top: 5rem; }
 .qr-boundary-block { height: 0; line-height: 0; margin: 0; padding: 0; }
 .qr-link { font-size: .7em; vertical-align: super; margin-left: .15em; text-decoration: none; }
-.qr-filtered { opacity: .35; }
+.qr-comment-muted { border-bottom: 0; }
+.qr-empty-annotation, .qr-link[hidden] { display: none !important; }
+.qr-change-link { font-weight: 700; border: 1px solid var(--qr-accent, currentColor); border-radius: .2rem; padding: 0 .15em; }
+.qr-change-id { font-size: .7rem !important; overflow-wrap: anywhere; }
+.qr-change-before, .qr-change-after { border-left: .2rem solid; padding: .25rem .6rem; margin: .6rem 0; }
+.qr-change-before { border-color: #c86559; }
+.qr-change-after { border-color: #4b9760; }
+.qr-change-before h3, .qr-change-after h3 { font: 600 .75rem/1.4 system-ui, sans-serif; margin: 0 0 .25rem; }
+.qr-native-change { font-style: italic; }
 body[data-review-view="proposed"] .qr-delete,
 body[data-review-view="original"] .qr-insert,
 body[data-review-view="proposed"] .qr-delete-block,
@@ -134,7 +142,6 @@ body[data-review-controls-visible="true"] :is(main, #title-block-header) :is(sec
 body[data-review-comments-visible="false"] .qr-link,
 body[data-review-comments-visible="false"] .qr-annotation-only-block { display: none !important; }
 body[data-review-comments-visible="false"] .qr-comment { border-bottom: 0; }
-body[data-review-clean="true"] .qr-filtered { opacity: 1; }
 body[data-review-clean="true"] .qr-delete-only { display: none !important; }
 @media (max-width: 575px) {
   .qr-controls { font-size: .75rem; gap: .4rem; }

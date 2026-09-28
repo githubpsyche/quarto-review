@@ -11,7 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const active = new Map();
   const items = [...panel.querySelectorAll(".qr-thread,.qr-suggestion")];
   const threads = items.filter(node => node.classList.contains("qr-thread"));
-  const threadById = new Map(threads.map(node => [node.dataset.reviewId, node]));
+  const suggestions = items.filter(node => node.classList.contains("qr-suggestion"));
+  const itemById = new Map(items.map(node => [node.dataset.reviewId, node]));
   const marksById = new Map();
   const anchors = new Map();
   const walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
@@ -29,16 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!anchors.has(id)) {
           anchors.set(id, node);
           node.id = `qr-anchor-${id}`;
-        }
-        if (kind === "C" && threadById.has(id)) {
-          const link = document.createElement("a");
-          link.className = "qr-link";
-          link.href = `#qr-thread-${id}`;
-          link.textContent = id;
-          link.dataset.commentId = id;
-          link.setAttribute("aria-label", `Read comment ${id} beside this passage`);
-          link.setAttribute("aria-controls", "qr-context-panel");
-          node.after(link);
         }
       } else active.delete(key);
       continue;
@@ -60,6 +51,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     node.replaceWith(span);
     span.append(node);
+  }
+  // Even an accepted deletion has a point anchor. Give it a discoverable
+  // marker when changes are selected, without restoring its deleted prose.
+  const links = [];
+  for (const item of items) {
+    const id = item.dataset.reviewId;
+    const anchor = anchors.get(item.dataset.anchorId || id);
+    if (!anchor) continue;
+    anchors.set(id, anchor);
+    const link = document.createElement("a");
+    const change = item.dataset.kind === "suggestion";
+    link.className = `qr-link ${change ? "qr-change-link" : "qr-comment-link"}`;
+    link.href = `#qr-${change ? "suggestion" : "thread"}-${id}`;
+    link.textContent = change ? "Δ" : id;
+    link.dataset.qrTarget = id;
+    link.setAttribute("aria-label", change ? `Inspect ${item.querySelector("header").textContent}` : `Read comment ${id} beside this passage`);
+    link.setAttribute("aria-controls", "qr-context-panel");
+    link.hidden = true;
+    anchor.after(link);
+    links.push(link);
+  }
+  const attributions = new Map();
+  for (const item of suggestions) {
+    const id = item.dataset.reviewId;
+    const attribution = `Suggested by ${item.dataset.author || "Unattributed"} (${id}; ${item.dataset.status})`;
+    for (const mark of marksById.get(item.dataset.anchorId || id) || []) {
+      const existing = attributions.get(mark);
+      attributions.set(mark, existing ? `${existing}\n${attribution}` : attribution);
+    }
+    const link = links.find(link => link.dataset.qrTarget === id);
+    if (link) link.title = attribution;
   }
   for (const block of scope.querySelectorAll("p,li,figcaption")) {
     if (!inContent(block)) continue;
@@ -100,10 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
   toolbarHeading.className = "qr-toolbar-heading";
   const toolbarTitle = document.createElement("strong");
   toolbarTitle.textContent = "Review";
-  const toggleComments = button("Hide comments", "qr-toggle-comments", () => setVisibility(controlsVisible, !commentsVisible));
+  const toggleComments = button("Hide review cards", "qr-toggle-comments", () => setVisibility(controlsVisible, !commentsVisible));
   toggleComments.setAttribute("aria-controls", "qr-context-panel quarto-review");
   const readingButton = button("Reading view", "qr-reading-view", () => setVisibility(false, false));
-  readingButton.title = "Hide review controls and comments; show clean proposed text";
+  readingButton.title = "Hide review controls and cards; show clean proposed text";
   const hideControls = button("Hide controls", "qr-hide-controls", () => setVisibility(false, commentsVisible));
   hideControls.setAttribute("aria-controls", "qr-controls");
   toolbarHeading.append(toolbarTitle, toggleComments, readingButton, hideControls);
@@ -119,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const view = controls.querySelector("#qr-view");
   const author = controls.querySelector("#qr-author");
   const status = controls.querySelector("#qr-status");
+  const kind = controls.querySelector("#qr-kind");
   const index = document.createElement("details");
   index.className = "qr-index";
   const summary = document.createElement("summary");
@@ -130,15 +153,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const dock = document.createElement("aside");
   dock.id = "qr-context-panel";
   dock.className = "qr-context-panel";
-  dock.setAttribute("aria-label", "Comments beside the passage");
+  dock.setAttribute("aria-label", "Review beside the passage");
   const dockHeading = document.createElement("h2");
-  dockHeading.textContent = "Comments on this passage";
+  dockHeading.textContent = "Review of this passage";
   const dockHint = document.createElement("p");
   dockHint.className = "qr-context-hint";
-  dockHint.textContent = "Follows the text as you read. Hover over a marked passage to see its comments.";
+  dockHint.textContent = "Follows the text as you read. Use Next to reach a matching comment or change. Δ marks a change location.";
   const dockNavigation = document.createElement("nav");
   dockNavigation.setAttribute("aria-label", "Comment navigation");
-  for (const [label, direction] of [["Previous comment", -1], ["Next comment", 1]]) {
+  for (const [label, direction] of [["Previous review item", -1], ["Next review item", 1]]) {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = direction < 0 ? "Previous" : "Next";
@@ -171,8 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const groups = new Map();
   const groupById = new Map();
-  for (const thread of threads) {
-    const id = thread.dataset.reviewId;
+  for (const item of items) {
+    const id = item.dataset.reviewId;
     const anchor = anchors.get(id);
     if (!anchor) continue;
     const passage = passageFor(anchor);
@@ -184,50 +207,75 @@ document.addEventListener("DOMContentLoaded", () => {
   let mode = "";
   let selectedGroup = null;
   let selectedIds = "";
-  let current = -1;
+  let currentId = null;
+  let selectionScrollY = null;
   let frame = 0;
   const visiblePassages = new Set();
-  const matching = group => group.ids.filter(id => !threadById.get(id).hidden);
+  const matching = group => group.ids.filter(id => !itemById.get(id).hidden);
 
   function makeCard(id) {
-    const card = threadById.get(id).cloneNode(true);
-    card.classList.remove("qr-thread");
+    const card = itemById.get(id).cloneNode(true);
+    card.classList.remove("qr-thread", "qr-suggestion");
     card.classList.add("qr-card");
     card.hidden = false;
     card.id = `qr-context-${id}`;
     for (const element of card.querySelectorAll("[id]")) element.removeAttribute("id");
+    if (itemById.get(id).dataset.kind === "suggestion") return card;
     const excerpt = document.createElement("blockquote");
     excerpt.className = "qr-context-quote";
     const marks = marksById.get(id) || [];
-    const text = marks.filter(mark => mark.getClientRects().length).map(mark => mark.innerText).join("").replace(/\s+/g, " ").trim();
-    excerpt.textContent = text ? (text.length > 360 ? text.slice(0, 357) + "…" : text) : "At this point in the text";
+    // Read each alternative independently, including marks hidden in the other
+    // view. Concatenating visible redlines joins deleted and inserted words.
+    const wording = excluded => marks.filter(mark => !mark.classList.contains(excluded))
+      .map(mark => mark.textContent).join("").replace(/\s+/g, " ").trim();
+    const original = wording("qr-insert");
+    const proposed = wording("qr-delete");
+    const shorten = text => text.length > 360 ? text.slice(0, 357) + "…" : text;
+    const textView = document.body.dataset.reviewView;
+    if (textView === "review" && original !== proposed) {
+      for (const [label, text] of [["Original", original], ["Proposed", proposed]]) {
+        const line = document.createElement("div");
+        const heading = document.createElement("strong");
+        heading.textContent = `${label}: `;
+        line.append(heading, shorten(text) || "(no text in this view)");
+        excerpt.append(line);
+      }
+    } else {
+      const text = textView === "original" ? original : proposed;
+      excerpt.textContent = shorten(text) || (original || proposed ? "No text in this view" : "At this point in the text");
+    }
     card.insertBefore(excerpt, card.querySelector(".qr-body"));
     return card;
   }
   function showGroup(group, force = false) {
-    if (mode !== "margin" || !commentsVisible) return;
     const ids = group ? matching(group) : [];
+    if (selectedGroup !== group) currentId = ids[0] || group?.ids[0] || null;
+    selectedGroup = group;
+    if (mode !== "margin" || !commentsVisible) return;
     const key = ids.join(" ");
     if (!force && key === selectedIds) return;
-    selectedGroup = group;
     selectedIds = key;
     dockContent.replaceChildren(...ids.map(makeCard));
     dockContent.scrollTop = 0;
     if (!ids.length) {
       const empty = document.createElement("p");
       empty.className = "qr-context-empty";
-      empty.textContent = "Comments appear here when an annotated passage is on screen.";
+      empty.textContent = items.some(item => !item.hidden)
+        ? "No matching review items at this passage. Use Next to reach one."
+        : "No review items match these filters.";
       dockContent.append(empty);
     }
   }
   function followPassage() {
-    if (mode !== "margin" || !commentsVisible) return;
-    const line = Math.min(innerHeight * .36, 320);
+    // Keep an explicitly selected item until the reader moves the document.
+    // This also prevents our own navigation scroll from selecting a neighbour.
+    if (selectionScrollY !== null && Math.abs(scrollY - selectionScrollY) < 1) return;
+    selectionScrollY = null;
+    const line = readingLine();
     let nearest = null;
     let distance = Infinity;
     for (const passage of visiblePassages) {
       const group = groups.get(passage);
-      if (!matching(group).length) continue;
       const box = passage.getBoundingClientRect();
       if (box.bottom < 0 || box.top > innerHeight) continue;
       const score = box.top > line ? box.top - line : box.bottom < line ? line - box.bottom : 0;
@@ -257,7 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!group.inline) {
         group.inline = document.createElement("aside");
         group.inline.className = "qr-inline-comments";
-        group.inline.setAttribute("aria-label", "Comments on the preceding passage");
+        group.inline.setAttribute("aria-label", "Review of the preceding passage");
         group.passage.after(group.inline);
       }
       const ids = matching(group);
@@ -313,62 +361,101 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.dataset.reviewControlsVisible = String(controlsVisible);
     document.body.dataset.reviewCommentsVisible = String(commentsVisible);
     document.body.dataset.reviewView = clean ? "proposed" : view.value;
-    const visible = new Set();
-    for (const item of items) {
-      const match = (!author.value || item.dataset.author.split("\n").includes(author.value)) && (!status.value || status.value === item.dataset.status);
-      item.hidden = !match;
-      if (match) {
-        visible.add(item.dataset.reviewId);
-        if (item.dataset.anchorId) visible.add(item.dataset.anchorId);
-      }
+    for (const option of status.options) {
+      option.hidden = option.disabled = Boolean(kind.value && option.dataset.kind && option.dataset.kind !== kind.value);
     }
-    for (const mark of scope.querySelectorAll(".qr-mark")) mark.classList.toggle("qr-filtered", Boolean(author.value || status.value) && !mark.dataset.reviewIds.split(" ").some(id => visible.has(id)));
-    controls.querySelector("#qr-count").textContent = `${threads.filter(item => !item.hidden).length} comments shown`;
-    current = -1;
+    if (status.selectedOptions[0]?.disabled) status.value = "";
+    for (const item of items) {
+      item.hidden = Boolean(
+        kind.value && kind.value !== item.dataset.kind ||
+        author.value && !item.dataset.author.split("\n").includes(author.value) ||
+        status.value && status.value !== item.dataset.status
+      );
+    }
+    for (const [mark, attribution] of attributions) {
+      if (clean) mark.removeAttribute("title");
+      else mark.title = attribution;
+    }
+    // Filters select review records, not manuscript wording or redline colour.
+    for (const link of links) link.hidden = !commentsVisible || clean || itemById.get(link.dataset.qrTarget).hidden;
+    for (const mark of scope.querySelectorAll(".qr-comment")) {
+      mark.classList.toggle("qr-comment-muted", !commentsVisible || !mark.dataset.reviewIds.split(" ").some(id => {
+        const item = itemById.get(id);
+        return item?.dataset.kind === "comment" && !item.hidden;
+      }));
+    }
+    for (const block of scope.querySelectorAll(".qr-annotation-only-block")) {
+      block.classList.toggle("qr-empty-annotation", ![...block.querySelectorAll(".qr-link")].some(link => !link.hidden));
+    }
+    const count = (records, label) => {
+      const n = records.filter(item => !item.hidden).length;
+      return `${n} ${label}${n === 1 ? "" : "s"}`;
+    };
+    controls.querySelector("#qr-count").textContent = `${count(threads, "comment")}, ${count(suggestions, "change")} shown`;
     if (mode === "inline") renderInline();
     else showGroup(selectedGroup, true);
     scheduleFollow();
   }
-  function setVisibility(showControls, showComments) {
-    // Hold the passage in place when a toolbar or in-flow comments disappear.
-    const readingLine = Math.max(32, controlsVisible ? controls.getBoundingClientRect().bottom + 16 : 32);
+  function readingLine() {
+    return Math.max(Math.min(innerHeight * .36, 320), controlsVisible ? controls.getBoundingClientRect().bottom + 16 : 32);
+  }
+  function keepReadingPosition(action) {
+    const line = readingLine();
     const passage = scrollY > 2 ? [...scope.querySelectorAll("p,h1,h2,h3,h4,h5,h6,figure,table")].find(node => {
       if (!inContent(node)) return false;
       if (node.closest(".qr-controls,.qr-panel,.qr-inline-comments")) return false;
       const box = node.getBoundingClientRect();
-      return box.height && box.bottom > readingLine && box.top < innerHeight;
+      return box.height && box.bottom > line && box.top < innerHeight;
     }) : null;
     const previousTop = passage?.getBoundingClientRect().top;
-    const focusWasInControls = controls.contains(document.activeElement);
-    const focusWasInComments = dock.contains(document.activeElement) || panel.contains(document.activeElement) || Boolean(document.activeElement?.closest(".qr-inline-comments"));
-    controlsVisible = showControls;
-    commentsVisible = showComments;
-    controls.hidden = !showControls;
-    panel.hidden = !showComments;
-    restore.hidden = showControls;
-    restore.textContent = showComments ? "Show controls" : "Show review";
-    restore.title = showComments ? "Show review controls" : "Restore review controls, comments, and your previous text view";
-    toggleComments.textContent = showComments ? "Hide comments" : "Show comments";
-    toggleComments.setAttribute("aria-expanded", String(showComments));
-    update();
-    layout();
+    const selected = selectionScrollY !== null && Math.abs(scrollY - selectionScrollY) < 1;
+    action();
     if (passage?.getClientRects().length) {
       const shift = passage.getBoundingClientRect().top - previousTop;
       if (Math.abs(shift) > 1) window.scrollBy({top: shift, behavior: "instant"});
     }
+    if (selected) selectionScrollY = scrollY;
+  }
+  function setVisibility(showControls, showComments) {
+    const focusWasInControls = controls.contains(document.activeElement);
+    const focusWasInComments = dock.contains(document.activeElement) || panel.contains(document.activeElement) || Boolean(document.activeElement?.closest(".qr-inline-comments"));
+    keepReadingPosition(() => {
+      controlsVisible = showControls;
+      commentsVisible = showComments;
+      controls.hidden = !showControls;
+      panel.hidden = !showComments;
+      restore.hidden = showControls;
+      restore.textContent = showComments ? "Show controls" : "Show review";
+      restore.title = showComments ? "Show review controls" : "Restore review controls, cards, and your previous text view";
+      toggleComments.textContent = showComments ? "Hide review cards" : "Show review cards";
+      toggleComments.setAttribute("aria-expanded", String(showComments));
+      update();
+      layout();
+    });
     if (!showControls && (focusWasInControls || !showComments && focusWasInComments)) restore.focus({preventScroll: true});
     else if (!showComments && focusWasInComments) toggleComments.focus({preventScroll: true});
   }
   function navigate(direction) {
-    const available = threads.filter(item => !item.hidden && anchors.has(item.dataset.reviewId));
+    const ordered = items.filter(item => anchors.has(item.dataset.reviewId)).sort((a, b) => {
+      const order = anchors.get(a.dataset.reviewId).compareDocumentPosition(anchors.get(b.dataset.reviewId));
+      return order & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : order & Node.DOCUMENT_POSITION_PRECEDING ? 1 : 0;
+    });
+    const available = ordered.filter(item => !item.hidden);
     if (!available.length) return;
-    current = current < 0 ? (direction > 0 ? 0 : available.length - 1) : (current + direction + available.length) % available.length;
-    const id = available[current].dataset.reviewId;
-    anchors.get(id).scrollIntoView({block: "center"});
-    showGroup(groupById.get(id));
+    const origin = ordered.findIndex(item => item.dataset.reviewId === currentId);
+    const candidates = direction > 0 ? available : [...available].reverse();
+    const next = candidates.find(item => origin >= 0
+      ? direction * (ordered.indexOf(item) - origin) > 0
+      : direction * (groupById.get(item.dataset.reviewId).passage.getBoundingClientRect().top - readingLine()) >= 0
+    ) || candidates[0];
+    const id = next.dataset.reviewId;
+    anchors.get(id).scrollIntoView({block: "center", behavior: "instant"});
+    showComment(id);
   }
   function showComment(id) {
     showGroup(groupById.get(id));
+    currentId = id;
+    selectionScrollY = scrollY;
     if (mode !== "margin" || !commentsVisible) return;
     const card = dockContent.querySelector(`[data-review-id="${id}"]`);
     if (!card) return;
@@ -380,25 +467,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function commentAt(target) {
     const link = target.closest(".qr-link");
-    if (link) return link.dataset.commentId;
-    const mark = target.closest(".qr-comment");
-    return mark?.dataset.reviewIds.split(" ").find(id => groupById.has(id) && !threadById.get(id).hidden);
+    if (link && !link.hidden) return link.dataset.qrTarget;
+    const mark = target.closest(".qr-mark");
+    return items.find(item => !item.hidden && groupById.has(item.dataset.reviewId) && mark?.dataset.reviewIds.split(" ").includes(item.dataset.anchorId || item.dataset.reviewId))?.dataset.reviewId;
   }
-  for (const event of ["pointerover", "focusin"]) scope.addEventListener(event, e => {
+  // React to pointer movement, not a stationary pointer re-entering text when
+  // filtering changes the layout underneath it.
+  for (const event of ["pointermove", "focusin"]) scope.addEventListener(event, e => {
     const id = commentAt(e.target);
-    if (id) showComment(id);
+    if (id && id !== currentId) showComment(id);
   });
   document.addEventListener("click", event => {
-    const link = event.target.closest('a[href^="#qr-thread-"],.qr-card a[href^="#qr-anchor-"]');
+    const link = event.target.closest('a[data-qr-target]');
     if (!link) return;
-    const id = link.getAttribute("href").replace(/^#qr-(?:thread|anchor)-/, "");
+    const id = link.dataset.qrTarget;
     if (!groupById.has(id)) return;
     event.preventDefault();
     event.stopPropagation();
-    if (link.closest(".qr-index,.qr-card")) anchors.get(id).scrollIntoView({block: "center"});
+    if (link.closest(".qr-index,.qr-card")) anchors.get(id).scrollIntoView({block: "center", behavior: "instant"});
     showComment(id);
   }, true);
-  for (const element of [view, author, status]) element.addEventListener("change", update);
+  for (const element of [view, kind, author, status]) element.addEventListener("change", () => {
+    keepReadingPosition(update);
+  });
   controls.querySelector("#qr-next").addEventListener("click", () => navigate(1));
   controls.querySelector("#qr-previous").addEventListener("click", () => navigate(-1));
   window.addEventListener("scroll", scheduleFollow, {passive: true});
