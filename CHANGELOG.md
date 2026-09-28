@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.1 — unreleased candidate
+## 0.2.1 — 2026-09-29
 
 - Browse matching comments and changes in an independent HTML review list, with explicit navigation back to a passage.
 - Filter authors' pending edits, inspect settled change alternatives, and keep fragmented inline edits readable without redundant markers.
@@ -10,5 +10,6 @@
 - Run browser checks, the explicit review round and isolated wheel rendering alongside source tests in CI; pull requests do not deploy Pages.
 - Display demo build provenance and align package, module and extension version declarations.
 
-Current schema-2 Word application validation and a clean tagged release remain outstanding.
-See docs/release.md for candidate evidence and publication checks.
+A complete synthetic schema-2 review cycle passed in Word for Mac 16.113.2, including acceptance, rejection, reply, resolution, explicit return reconciliation, a retained local edit and another Word save.
+Word rounds pending revision timestamps to minutes; comment and reply timestamps were unchanged in this check.
+See [release evidence](docs/release.md) for automated checks, skipped coverage and limits.

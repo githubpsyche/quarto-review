@@ -1,21 +1,22 @@
 # Compatibility and implementation status
 
-## Schema 2: current automated evidence
+## Schema 2: current evidence
 
 The single-source format is implemented with compact spans, crossing ranges, author aliases, Markdown thread blocks and inline suggestion decisions.
 Tests cover source-only operations, deletion without removing prose, concurrent-write rejection, comment movement without prose changes, loss-checked candidate conversion, native Word import, HTML/Word output and executed references.
 The full non-private regression suite also exercises the existing converter and schema-1 compatibility.
-The current candidate is version 0.2.1; package, Python module and Quarto extension version declarations agree.
+The checked version is 0.2.1; package, Python module and Quarto extension version declarations agree.
 Focused checks also verify that opting an imported message into Markdown survives later review operations.
-The reproducible checks, recorded local results and remaining release gate are in [release checks](release.md).
-An interactive Word application cycle has not yet been repeated specifically for schema 2.
+The reproducible checks and recorded results are in [release checks](release.md).
+A complete schema-2 application cycle passed in Word for Mac 16.113.2 on 29 September 2026: accept and reject replacements, add a reply, resolve, save, import into a separate candidate, explicitly reconcile while retaining a newer local edit, export, reopen, save and import again.
+This validates the documented explicit workflow on that Word version; it does not establish automatic schema-2 reconciliation or every Word feature.
 
 | Current schema-2 capability | Evidence and boundary |
 | --- | --- |
 | Source operations and comparison | Automated tests cover text, ranges, decisions, attribution and unchanged references. Saving detects earlier changes but does not lock simultaneous writers. |
 | HTML review | Automated synthetic browser checks cover filters, matching state transitions, lists, navigation, author focus, media, keyboard access and reading-view restoration. |
-| Word import and export | Automated package, relationship, identity and content checks; not a replacement for opening and saving in Word. |
-| Returned feedback | Separate candidate import and a worked explicit reconciliation example retaining newer local edits. No automatic schema-2 receive/merge. |
+| Word import and export | Automated package, relationship, identity and content checks, plus a completed synthetic Word for Mac 16.113.2 application cycle. |
+| Returned feedback | Scripted and native Word returns both checked through separate candidate import and explicit reconciliation retaining newer local edits. No automatic schema-2 receive/merge. |
 | Installed package | A disposable wheel installation renders HTML and Word; the check rejects accidental imports from the development checkout. |
 | Platform coverage | Development checks on macOS and the automated release checks on Ubuntu passed. Windows and R execution are not established by these checks. |
 

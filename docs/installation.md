@@ -2,14 +2,13 @@
 
 The package requires Python 3.12 or later and Quarto; development and CI use Quarto 1.8.27.
 Node is used only for browser tests, not for manuscript editing or rendering.
-Version 0.2.1 is a local release candidate until a tag and release are published.
+The instructions below select version 0.2.1; its validation scope is recorded in [release evidence](release.md).
 
 ## Install a chosen checkout
 
 ~~~sh
-git clone https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.2.1 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
-# Optional: git checkout <verified-commit-or-release-tag>
 python -m venv .venv-user
 source .venv-user/bin/activate
 python -m pip install .

@@ -62,12 +62,12 @@ Read the [source-format guide](docs/single-source.md) for overlapping ranges, re
 
 ## Install and start
 
-This checkout prepares version 0.2.1 as a development preview.
-There is no published 0.2.1 tag yet.
+Version 0.2.1 includes an explicitly reconciled review cycle checked in Word for Mac.
+See the [release evidence](docs/release.md) for the tested workflow and limits.
 Install Python 3.12 or later, Git and Quarto (tested with 1.8.27), then install the selected source checkout:
 
 ~~~sh
-git clone https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.2.1 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
 python -m venv .venv-user
 source .venv-user/bin/activate
@@ -75,7 +75,7 @@ python -m pip install .
 ~~~
 
 On Windows, activate with `.venv-user\Scripts\Activate.ps1` in PowerShell.
-Use `git checkout <commit-or-release-tag>` before installation to choose a reproducible version; an unpinned clone follows the current default branch.
+The command above selects the v0.2.1 tag; use a different verified tag explicitly when upgrading.
 Keep the environment in place while its manuscript projects use it.
 See [installation, upgrades and removal](docs/installation.md) for project-local changes and moving a project.
 
@@ -162,7 +162,7 @@ This preserves native attribution and source identities.
 Returned Word feedback is reviewed against an explicitly selected prior version; schema 2 does not silently merge it into an active manuscript.
 The older automatic receive workflow remains specific to schema 1.
 Follow the [worked review round](docs/review-round.md) to retain the version sent, examine a returned candidate and apply explicit decisions without replacing newer local work.
-That example includes a reproducible scripted check; it does not establish compatibility with the Word application.
+That example includes a reproducible scripted check; the separate [Word application check](docs/release.md#current-format-native-word-check) also passed for 0.2.1.
 
 Convert a schema-1 project and its frozen reference into a separate candidate:
 
@@ -187,8 +187,7 @@ UV_PROJECT_ENVIRONMENT=.venv-dev uv run pytest -m "not private"
 Keep development environments and synthetic fixtures separate from manuscript projects.
 Run the [release checks](docs/release.md) before distributing a candidate.
 See [status and limits](docs/status.md), [architecture](docs/design.md), and [performance](docs/performance.md).
-The historical interactive Word verification applies to schema 1.
-Current schema-2 automated checks and the remaining native Word check are listed separately in [compatibility evidence](docs/status.md).
+Current schema-2 automated and native Word checks are listed separately from historical schema-1 results in [compatibility evidence](docs/status.md).
 
 ## Public guide and examples
 
