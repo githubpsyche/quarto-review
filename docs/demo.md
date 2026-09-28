@@ -31,8 +31,11 @@ The build uses only the synthetic example; it does not read, configure or render
 
 ## GitHub Pages
 
-.github/workflows/pages.yml runs on pushes to main and manual dispatch.
-It installs the locked Python dependencies and Quarto 1.8.27, runs the non-private regression tests, builds and validates the walkthrough, and deploys the generated site with GitHub's Pages artifact actions.
+.github/workflows/pages.yml checks pull requests, pushes to main and manual dispatches.
+It installs the locked Python and browser dependencies and Quarto 1.8.27, runs source tests, browser checks, the explicit review-round example and an isolated wheel check, then builds the guide.
+Only successful main builds deploy through GitHub Pages; pull requests cannot deploy.
+The guide displays its package version and links to downloads/build-info.json with the commit, modified-tree flag and source hash.
+A locally modified build is labelled as such rather than presented as a released commit.
 Repository Pages settings must use GitHub Actions as the source.
 The build job has read-only repository access; the deployment job has Pages and identity-token permissions.
 No personal access token is stored in the repository or workflow.

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
+from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import unquote, urlsplit
@@ -13,6 +15,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 from lxml import html
 
+from quarto_review import __version__
 from quarto_review.markup import Comment, walk
 from quarto_review.project import Project
 from quarto_review.quarto import enable
@@ -29,6 +32,13 @@ def verify(directory: Path, project: Project) -> None:
     """Check published links, review bodies, attribution and native Word records."""
     page = html.fromstring((directory / "index.html").read_bytes())
     assert page.xpath('//*[@id="qr-view"]'), "Review controls missing"
+    assert f"Built with quarto-review {__version__}" in page.text_content()
+    assert (
+        json.loads((directory / "downloads/build-info.json").read_text())[
+            "package_version"
+        ]
+        == __version__
+    )
     assert page.xpath('//*[@id="qr-thread-c5"]//strong'), "Discussion Markdown missing"
     assert page.xpath('//*[@id="qr-thread-c6"]//*[contains(@class,"qr-body-plain")]'), (
         "Literal discussion missing"
@@ -73,11 +83,43 @@ def verify(directory: Path, project: Project) -> None:
     )
 
 
+def build_info() -> dict:
+    """Identify the exact local inputs, including changes outside the last commit."""
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT))
+    names = (
+        subprocess.check_output(
+            ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+            cwd=ROOT,
+        )
+        .decode()
+        .split("\0")
+    )
+    digest = sha256()
+    for name in sorted(set(filter(None, names))):
+        path = ROOT / name
+        if path.is_file():
+            digest.update(name.encode() + b"\0" + sha256(path.read_bytes()).digest())
+    return {
+        "package_version": __version__,
+        "review_schema": 2,
+        "git_commit": commit,
+        "working_tree_modified": dirty,
+        "source_sha256": digest.hexdigest(),
+        "quarto_version": subprocess.check_output(
+            ["quarto", "--version"], text=True
+        ).strip(),
+    }
+
+
 def build(destination: Path) -> None:
     destination = destination.resolve()
     if destination.exists():
         raise SystemExit(f"Use a fresh output directory: {destination}")
     originals = {name: (EXAMPLE / name).read_bytes() for name in SOURCE_FILES}
+    identity = build_info()
     with TemporaryDirectory(prefix="quarto-review-demo-") as temporary:
         project_dir = Path(temporary) / "walkthrough"
         project_dir.mkdir()
@@ -85,6 +127,23 @@ def build(destination: Path) -> None:
             (project_dir / name).write_bytes(contents)
         downloads = project_dir / "downloads"
         downloads.mkdir()
+        (downloads / "build-info.json").write_text(
+            json.dumps(identity, indent=2) + "\n"
+        )
+        build_label = (
+            "modified working tree"
+            if identity["working_tree_modified"]
+            else identity["git_commit"][:12]
+        )
+        note = f"Built with quarto-review {__version__} ({build_label}). [Build details](downloads/build-info.json).\n\n"
+        for name in ("index.qmd", "reference.qmd"):
+            path = project_dir / name
+            path.write_text(
+                path.read_text().replace(
+                    "This guide is itself a review document.",
+                    note + "This guide is itself a review document.",
+                )
+            )
         with ZipFile(downloads / "walkthrough.zip", "w", ZIP_DEFLATED) as archive:
             for name, contents in originals.items():
                 archive.writestr("walkthrough/" + name, contents)

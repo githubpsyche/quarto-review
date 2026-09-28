@@ -126,3 +126,50 @@ def test_crossing_review_boundary_requires_explicit_grouping():
             "A {==small==}{>>Explain.<<}{#c1} claim.\n",
             metadata,
         )
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        ("A claim.\n", "[]{#ref-example .anchor}A claim.\n"),
+        ("[]{#ref-example .anchor}A claim.\n", "A claim.\n"),
+        ("[]{#old}A claim.\n", "[]{#new .anchor}A claim.\n"),
+        ("A claim.\n", "A []{#point}claim.\n"),
+        ("A claim.\n", "A claim.[]{#end}\n"),
+        ("", "[]{#point}"),
+    ],
+)
+def test_empty_navigation_anchors_are_not_prose_edits(before, after):
+    result = compared(after, before)
+    assert result.automatic_ids == ()
+    assert project(result.document.nodes, "original") == after
+    assert project(result.document.nodes) == after
+
+
+def test_new_navigation_anchor_does_not_hide_adjacent_wording_change():
+    before = "A strong claim.\n"
+    after = "A []{#point .anchor}modest claim.\n"
+    result = compared(after, before)
+    assert len(result.automatic_ids) == 1
+    change = result.document.annotations()[result.automatic_ids[0]]
+    assert project(change.before) == "strong"
+    assert project(change.after) == "modest"
+    assert project(result.document.nodes) == after
+    assert project(result.document.nodes, "original") == "A []{#point .anchor}strong claim.\n"
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        ("Use `[]{#old}`.\n", "Use `[]{#new}`.\n"),
+        ("```markdown\n[]{#old}\n```\n", "```markdown\n[]{#new}\n```\n"),
+        (r"Use \[]{#old}.", r"Use \[]{#new}."),
+        ("[Old label]{#point}\n", "[New label]{#point}\n"),
+        ("[See](#old).\n", "[See](#new).\n"),
+    ],
+)
+def test_visible_anchor_syntax_and_link_changes_still_track(before, after):
+    result = compared(after, before)
+    assert result.automatic_ids
+    assert project(result.document.nodes, "original") == before
+    assert project(result.document.nodes) == after

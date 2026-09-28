@@ -1,14 +1,24 @@
 # Compatibility and implementation status
 
-## Schema 2: current automated evidence
+## Schema 2: current evidence
 
 The single-source format is implemented with compact spans, crossing ranges, author aliases, Markdown thread blocks and inline suggestion decisions.
 Tests cover source-only operations, deletion without removing prose, concurrent-write rejection, comment movement without prose changes, loss-checked candidate conversion, native Word import, HTML/Word output and executed references.
 The full non-private regression suite also exercises the existing converter and schema-1 compatibility.
-The discussion-formatting regression run passed 148 tests with four optional checks skipped and four private checks deselected.
+The checked version is 0.2.1; package, Python module and Quarto extension version declarations agree.
 Focused checks also verify that opting an imported message into Markdown survives later review operations.
-No live manuscript was migrated or rendered to validate schema 2.
-An interactive Word application cycle has not yet been repeated specifically for schema 2.
+The reproducible checks and recorded results are in [release checks](release.md).
+A complete schema-2 application cycle passed in Word for Mac 16.113.2 on 29 September 2026: accept and reject replacements, add a reply, resolve, save, import into a separate candidate, explicitly reconcile while retaining a newer local edit, export, reopen, save and import again.
+This validates the documented explicit workflow on that Word version; it does not establish automatic schema-2 reconciliation or every Word feature.
+
+| Current schema-2 capability | Evidence and boundary |
+| --- | --- |
+| Source operations and comparison | Automated tests cover text, ranges, decisions, attribution and unchanged references. Saving detects earlier changes but does not lock simultaneous writers. |
+| HTML review | Automated synthetic browser checks cover filters, matching state transitions, lists, navigation, author focus, media, keyboard access and reading-view restoration. |
+| Word import and export | Automated package, relationship, identity and content checks, plus a completed synthetic Word for Mac 16.113.2 application cycle. |
+| Returned feedback | Scripted and native Word returns both checked through separate candidate import and explicit reconciliation retaining newer local edits. No automatic schema-2 receive/merge. |
+| Installed package | A disposable wheel installation renders HTML and Word; the check rejects accidental imports from the development checkout. |
+| Platform coverage | Development checks on macOS and the automated release checks on Ubuntu passed. Windows and R execution are not established by these checks. |
 
 HTML discussions render basic CommonMark in a single conversion batch.
 Regression tests cover formatting, isolated message parsing, literal Word imports, reply and decision preservation, raw HTML, unsafe links and image suppression.
@@ -25,7 +35,10 @@ Word for Mac 16.113.2 on 27 September 2026: open, add a reply, resolve a thread,
 accept and reject replacements, save, import, render, reopen, and save again.
 This check does not establish compatibility with every Word version.
 
-## Tested behaviour
+## Historical schema-1 behaviour
+
+The following table and application findings document the older source format and native exporter.
+They do not establish automatic return reconciliation for schema 2.
 
 | Area | Evidence |
 | --- | --- |
@@ -94,6 +107,9 @@ thread. A repeated import added nothing, and the frozen reference stayed intact.
 
 ## Explicit limits
 
+References below to returned-file conflict detection describe the schema-1 reconciliation engine.
+Schema 2 imports a candidate; comparing it with the version sent and the latest working source remains an explicit user task.
+
 - Review annotations in YAML metadata, including a YAML title or abstract, are
   not supported. Rendering reports omitted annotations rather than dropping them.
   Keep reviewable manuscript passages in the body.
@@ -129,3 +145,23 @@ thread. A repeated import added nothing, and the frozen reference stayed intact.
 The source and archive are preserved when a case cannot be reconciled. A diagnostic
 is a request to make a concrete source decision, not a claim that the conversion
 completed successfully.
+
+
+## Inspecting settled suggestions in HTML
+
+Review cards now support comments and changes, selected separately in the Review control.
+Accepted and rejected changes keep readable before/after text, authors and statuses in their cards while the manuscript retains its decided wording.
+Empty change ranges have visible location markers when changes are selected.
+Status filtering selects records without fading the manuscript's tracked-change colours.
+In Redline, author filtering additionally shows only the selected author’s pending edits, with other authors’ edits projected as proposed wording.
+This view preserves decisions, nested edits, figures and other media; Original and Proposed retain their full-document readings.
+A synthetic author-focus fixture verifies these behaviours, focused comment excerpts, navigation and restoration on wide and narrow screens.
+Nested decisions apply within the alternatives shown in a parent change card.
+Filtering preserves the current reading position, including when earlier inline cards disappear.
+Navigation follows the selected item or scrolled passage and is not reset by filters or stationary-pointer layout changes.
+Hover attribution names the authors of overlapping changes independently of the card filters; Reading view hides these tooltips.
+Comment excerpts distinguish original and proposed readings and identify empty alternatives.
+On 28 September 2026, the public suite passed with 170 tests, 4 optional-runtime skips and 4 private tests deselected.
+Synthetic browser checks passed at desktop and narrow widths for these behaviours, accepted section deletion, rejected insertion, empty results and clean reading/restoration.
+Native formatting and equation revisions without separate text alternatives are described as native Word changes and linked to the corresponding passage.
+Their detailed Word formatting is not reconstructed in a text card.

@@ -136,6 +136,7 @@ _TOKENS = re.compile(
     r"|(?m:^ {0,3}(?P<fence>`{3,}|~{3,})[^\n]*\n.*?^ {0,3}(?P=fence)[ \t]*(?:\n|$))"
     r"|\$\$.*?\$\$|(?<!\\)\$(?:\\.|[^$\n])+?\$"
     r"|`+[^`\n]*`+"
+    r"|(?P<anchor>\[\]\{[ \t]*#[A-Za-z][\w.:-]*(?:[ \t]+\.[\w:-]+)*[ \t]*\})"
     r"|!?\[(?:\\.|[^\]\n])*\](?:\([^\n)]*\)|\[[^\]\n]*\])?"
     r"|\*\*[^*\n]+\*\*|\*[^*\n]+\*|__[^_\n]+__|_[^_\n]+_"
     r"|\{[^{}\n]*\}|\\."
@@ -148,6 +149,11 @@ def _blocks(source: str) -> list[list[Token]]:
     blocks: list[list[Token]] = []
     current: list[Token] = []
     for match in _TOKENS.finditer(source):
+        # Empty navigation spans become bookmarks, not Word text revisions.
+        # Ignore them for alignment while retaining the current source and
+        # offsets. Code and escaped syntax are consumed by other token branches.
+        if match.group("anchor"):
+            continue
         value = match[0]
         if match.start() == 0 and value.startswith("---\n"):
             value = "\0metadata"

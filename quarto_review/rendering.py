@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 from typing import Literal
@@ -34,6 +34,7 @@ class PreparedRender:
     metadata: ReviewMetadata
     comments: dict[str, str]
     expected: Counter[str]
+    suggestions: dict[str, tuple[str, str]] = field(default_factory=dict)
 
 
 def prepare_render(
@@ -183,7 +184,11 @@ def prepare_render(
                     discarded = node.before if state == "accepted" else node.after
                     discarded_pieces = []
                     for child in walk(discarded):
-                        if isinstance(child, Boundary):
+                        if isinstance(child, Change) and not native_objects:
+                            # The parent decision can remove a nested suggestion's
+                            # entire range. Retain a point for its HTML history card.
+                            discarded_pieces.append(marked("O", child.id, ""))
+                        elif isinstance(child, Boundary):
                             if (
                                 child.id not in metadata.comments
                                 and child.id not in reply_ids
@@ -240,4 +245,15 @@ def prepare_render(
         return "".join(pieces)
 
     markdown = render(document.nodes)
-    return PreparedRender(markdown, metadata, comments, expected)
+    # Keep both source alternatives for inspection after a decision. They are
+    # review-card content, never reintroduced into the manuscript projection.
+    # Decisions on nested edits still apply within each alternative.
+    suggestions = {
+        node.id: (
+            project(node.before, "original", decisions),
+            project(node.after, "proposed", decisions),
+        )
+        for node in walk(document.nodes)
+        if isinstance(node, Change) and node.id in metadata.suggestions
+    }
+    return PreparedRender(markdown, metadata, comments, expected, suggestions)

@@ -20,7 +20,7 @@ Install Quarto and Python 3.12 or later, then run these commands in this directo
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.2.1
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~

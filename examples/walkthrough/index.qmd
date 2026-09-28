@@ -61,7 +61,7 @@ Download and unzip the [editable example](downloads/walkthrough.zip), then run t
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.2.1
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~
@@ -292,7 +292,11 @@ quarto render index.qmd --to html
 ~~~
 
 In HTML, **Redline**, **Original** and **Proposed** compare pending wording.
-Marked passages open nearby discussions; author and status filters help focus the review.
+Review starts with Comments; select Changes to inspect suggestions, then filter their status to Pending, Accepted or Rejected.
+Change cards show removed and added wording alongside the author and decision.
+Previous and Next move through matching records, including accepted deletions and rejected insertions that leave no text in the manuscript.
+A Δ marker locates each change while changes are selected.
+Author and status filters affect the review cards without fading the manuscript's redline colours.
 **Reading view** hides markup, comments and controls, and **Show review** restores them.
 These are display choices and do not modify the QMD or exported Word draft.
 
@@ -321,6 +325,8 @@ quarto render index.qmd --to docx
 
 The [example Word draft](index.docx) contains native comments, replies and pending tracked changes generated from the same working source as this page.
 HTML views and filters do not change what is exported.
+The review list can show all matching comments and changes without moving the document.
+Review defaults to comments and changes, with open comments and pending changes selected; changing review type selects the corresponding available status.
 
 Freeze a new reference only when you deliberately begin a new review round:
 
@@ -350,6 +356,8 @@ Keep the original Word assets and native review-data records that the importer s
 **Current boundary:** this is not automatic synchronisation between a live Word document and your QMD.
 A returned Word draft is imported as a separate candidate for comparison with the version sent; the current single-source workflow does not automatically merge independently edited returns.
 Word-to-Quarto conversion also does not promise identical original Word page layout.
+Follow the [worked review round](https://github.com/githubpsyche/quarto-review/blob/main/docs/review-round.md) for the complete comparison and application procedure, including a retained local edit.
+The [installation guide](https://github.com/githubpsyche/quarto-review/blob/main/docs/installation.md) describes runtime files, upgrades and removal.
 
 See [tested compatibility and limits](https://github.com/githubpsyche/quarto-review/blob/main/docs/status.md) for supported constructs and verification evidence, and the [source-format reference](https://github.com/githubpsyche/quarto-review/blob/main/docs/single-source.md) for complete syntax.
 

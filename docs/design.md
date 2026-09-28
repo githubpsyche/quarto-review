@@ -18,7 +18,9 @@ It checks identities, attribution, decisions, parent relationships and ranges at
 
 Commands make validated edits to the same source model.
 They do not independently reconstruct an annotation in the HTML or Word layers.
-Saving checks that the source has not changed since it was read, then replaces the file atomically.
+Saving checks whether the source changed since it was read, then replaces the file atomically.
+The check and replacement are separate operations, so they do not guarantee safe simultaneous writers.
+Coordinate one writer per QMD; atomic replacement prevents partially written files.
 Source edits retain unrelated prose and formatting.
 
 ## Comparison and output
@@ -49,6 +51,6 @@ A mandatory per-export journal and automatic merging of divergent review histori
 
 Development uses a separate environment and synthetic fixtures.
 An active manuscript can remain on a preserved package and dependency copy while the development checkout changes.
-The pinned manuscript's source, reference, presentation and outputs remain owned by its editing chat.
-A future switch requires fresh candidates, an agreed editing pause, validation and rollback material.
+A manuscript project retains its existing runtime until its owner chooses to upgrade.
+Validate an upgrade against current inputs in an isolated candidate before switching; preserve a recoverable prior version.
 See development-isolation.md for the operational boundary.

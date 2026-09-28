@@ -75,7 +75,7 @@ def render_messages(messages: dict[str, tuple[str, str]]) -> dict[str, str]:
     if len(container) != len(markdown):
         raise ReviewError("Markdown discussion conversion changed the message count")
     for number, (identifier, element) in enumerate(zip(markdown, container), 1):
-        if element.tag != "div" or element.get("id") != f"message-{number}":
+        if element.tag not in {"div", "section"} or element.get("id") != f"message-{number}":
             raise ReviewError(
                 "Markdown discussion conversion changed message identities"
             )
