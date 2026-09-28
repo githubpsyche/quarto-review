@@ -31,7 +31,7 @@ jobs:
       - name: Check Python and source regressions
         run: |
           uv run ruff check quarto_review tests tools benchmarks
-          uv run pytest -q -m 'not private'
+          uv run pytest -q -ra -m 'not private'
       - name: Check browser interactions
         run: |
           npm ci

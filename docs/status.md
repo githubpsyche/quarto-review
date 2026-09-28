@@ -17,7 +17,7 @@ An interactive Word application cycle has not yet been repeated specifically for
 | Word import and export | Automated package, relationship, identity and content checks; not a replacement for opening and saving in Word. |
 | Returned feedback | Separate candidate import and a worked explicit reconciliation example retaining newer local edits. No automatic schema-2 receive/merge. |
 | Installed package | A disposable wheel installation renders HTML and Word; the check rejects accidental imports from the development checkout. |
-| Platform coverage | Development checks on macOS; CI is configured for Ubuntu. Windows and R execution are not established by these checks. |
+| Platform coverage | Development checks on macOS and the automated release checks on Ubuntu passed. Windows and R execution are not established by these checks. |
 
 HTML discussions render basic CommonMark in a single conversion batch.
 Regression tests cover formatting, isolated message parsing, literal Word imports, reply and decision preservation, raw HTML, unsafe links and image suppression.

@@ -12,7 +12,8 @@ Lint passed.
 All six browser groups passed: review panel, author focus, status transitions, independent list, inline markers and media.
 The scripted explicit review round passed, including retained local edits and reply provenance.
 The built wheel rendered HTML and Word from an isolated installation and passed native package checks.
-The updated GitHub workflow has not run remotely yet; local success is not a claim of a completed Ubuntu CI run.
+The [Ubuntu candidate check](https://github.com/githubpsyche/quarto-review/actions/runs/36495604497) passed on commit 58f5062892b26409d1518d3bdaad1bfbd15e0efa: 183 Python tests passed, six optional tests skipped and four private tests deselected.
+All six browser groups, the explicit review round, isolated wheel rendering and guide build also passed remotely.
 The native schema-2 Word application check below remains outstanding, so this is not yet a verified published release.
 
 ## Automated checks
@@ -20,7 +21,7 @@ The native schema-2 Word application check below remains outstanding, so this is
 ~~~sh
 UV_PROJECT_ENVIRONMENT=.venv-dev uv sync --locked
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run ruff check quarto_review tests tools benchmarks
-UV_PROJECT_ENVIRONMENT=.venv-dev uv run pytest -q -m "not private"
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run pytest -q -ra -m "not private"
 npm ci
 npx --no-install playwright install chromium
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/run_browser_checks.py
