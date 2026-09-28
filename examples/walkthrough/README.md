@@ -1,7 +1,7 @@
-# Editable walkthrough
+# Editable guide and examples
 
 This synthetic manuscript is the source of the public Quarto review demo.
-The document itself explains each feature as you encounter it.
+The document explains which files to maintain and how source edits produce review features in HTML and Word.
 All study details and reviewer names are fictional.
 
 ## Files
@@ -35,5 +35,5 @@ Word output is an explicit choice:
 quarto render index.qmd --to docx
 ~~~
 
-The walkthrough explains the review commands and current output limits.
+Read index.qmd alongside its HTML preview for source examples, review commands and current output limits.
 For development, use the repository's tools/build_demo.py to build a disposable copy and validate both outputs without modifying these source files.

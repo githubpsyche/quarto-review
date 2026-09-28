@@ -1,6 +1,6 @@
 ---
-title: Review a manuscript without losing the conversation
-subtitle: An interactive walkthrough of quarto-review
+title: Quarto review
+subtitle: Edit in plain text. Collaborate through Word.
 author: Quarto review contributors
 review:
   schema: 2
@@ -11,121 +11,52 @@ review:
     M: Morgan Reviewer
 ---
 
-This document is both a working example and a guided tour.
-Its suggestions, comments and replies are real review annotations rendered by the extension.
-The study, people and results below are fictional.
+**Write and revise your manuscript in Quarto while collaborators review Word drafts with native comments and tracked changes.**
+Quarto review brings supported Word feedback into editable QMD, keeps the discussion attached to the text, and produces a Word draft with review information intact.
+You can work in your preferred editor or with a coding assistant, inspect changes in HTML, and render Word when you are ready to share.
 
-[Download the Word example](index.docx) · [Download the editable example](downloads/walkthrough.zip) · [View the project on GitHub](https://github.com/githubpsyche/quarto-review)
+The manuscript, suggestions, comment threads and decisions live together in one working file.
+A frozen reference supplies the comparison for ordinary prose edits.
+Use explicit suggestions when you want to control exactly how a change is presented to collaborators.
 
-## Start with the controls
+[Get the editable example](downloads/walkthrough.zip) · [See its Word output](index.docx) · [Source code on GitHub](https://github.com/githubpsyche/quarto-review)
 
-Use the **Review** controls above to explore this manuscript.
-These controls stay available as you scroll.
+This guide is itself a review document.
+Each example pairs the source you edit with a result rendered by the extension.
+All study details and reviewer names are fictional.
 
-1. Switch **Text view** between **Redline**, **Original** and **Proposed** to compare pending wording.
-2. Hover over a marked passage, select its comment label, or use **Next comment** to read the discussion beside the text.
-3. Choose **Reading view** to hide controls, comments and markup; **Show review** brings them back.
+## The files you work with
 
-On narrow screens, comments appear next to their passages in the document flow.
-The page is a read-only review: changing a view or filter does not accept an edit or change anyone's comments.
-The final section shows how to make and save those changes locally.
+A review project keeps the usual Quarto manuscript structure:
 
-## Compare suggested wording
-
-The study found [a {~~large~>modest~~}{#s1 by=R at=2026-09-01T09:00:00Z} difference in recall]{#c1}.
-Participants remembered more words after spaced practice{++ than after massed practice++}{#s2 by=M at=2026-09-01T09:05:00Z}.
-The result was {--very --}{#s3 by=R at=2026-09-01T09:10:00Z}consistent across the two lists.
-
-**Try it:** switch to **Original**, then **Proposed**.
-The replacement, insertion and deletion above are pending, so all three respond to that choice.
-The comment on the first sentence explains the replacement and includes a reply.
-
-To propose a replacement in the source, use CriticMarkup with a stable ID and an author alias:
-
-~~~markdown
-The study found a {~~large~>modest~~}{#s1 by=R} difference in recall.
+~~~text
+manuscript/
+  index.qmd        # Working text, suggestions and discussions
+  reference.qmd    # Frozen comparison for this review round
+  _quarto.yml     # Layout and output formats
+  references.bib  # Bibliography, if your manuscript uses one
+  figures/        # Ordinary manuscript assets, if needed
 ~~~
 
-The review.authors mapping in the document's front matter defines each alias once.
-Names and dates remain attached to individual suggestions and messages.
+| File | What you do with it |
+| --- | --- |
+| index.qmd | Edit prose, propose wording, add or reply to comments, and record decisions. This is the authoritative working document. |
+| reference.qmd | Leave it unchanged during the review round. Rendering compares the working prose against this snapshot. |
+| _quarto.yml | Choose the manuscript layout, output formats and other normal Quarto settings. |
+| Bibliography and figures | Maintain them as you would in any Quarto project. |
 
-## Follow comments and replies
+There is no separate editable review.yml in the current single-source format.
+HTML and Word files are generated outputs; edits belong in index.qmd.
+The extension creates local rendering support and caches, which you do not maintain as manuscript content.
 
-Participants completed []{#c2-start}two practice sessions []{#c3-start}one week apart[]{#c2-end}, followed by a delayed recall test[]{#c3-end}.
-The [recruitment target was 40 participants]{#c4}.
+Imported projects can also contain an archived original Word file under assets/review/.
+Keep that archive and any adjacent review-data records in the QMD: some native formatting, objects and comment identities depend on them.
+They are preserved source information rather than another draft to edit.
 
-**Try it:** inspect the two overlapping comments on the first sentence.
-One asks about the sessions; the other asks about timing.
-Each retains its own passage even though the ranges overlap.
-Robin's thread also includes a reply to Alex's reply.
+## Get a local preview {#work-locally}
 
-The recruitment comment is already **resolved**.
-Use the **Status** filter to find resolved discussions, then return to **All statuses**.
-Use **Author** to focus on a reviewer; threads also match their reply participants.
-**Hide comments** and **Hide controls** work independently.
-
-For an ordinary comment, put a short range marker in the prose and its discussion elsewhere in the same QMD file:
-
-~~~markdown
-The [recruitment target was 40 participants]{#c4}.
-
-:::: {.review-thread #c4 by=M .resolved}
-Is this the planned or final sample?
-
-::: {.reply #r4 by=A}
-The planned sample; I have made that explicit.
-:::
-::::
-~~~
-
-Moving the discussion block does not move the comment's anchor.
-Overlapping comments use explicit start and end markers, as demonstrated in the downloadable source.
-
-## See ordinary edits too
-
-Participants completed a short practice session.
-
-This sentence was edited directly in index.qmd without adding CriticMarkup.
-The frozen reference.qmd still says, “Participants completed a short practice session.”
-Their comparison supplies the visible suggestion automatically.
-Try the two text views to inspect that difference.
-
-Keep editing index.qmd during a review round and leave reference.qmd frozen.
-Changes to replies or comment status do not create manuscript wording changes.
-To give an automatically detected edit a persistent decision, use its ID from the feedback command; the extension records it explicitly in the source.
-
-## Recognise decisions already made
-
-The task was {~~hard~>demanding~~}{#s4 by=R .accepted}.
-The finding {~~suggests~>proves~~}{#s5 by=M .rejected} that spacing may improve recall.
-
-The first suggestion was **accepted**; the second was **rejected**.
-Both text views therefore show “demanding” and “suggests”.
-The alternatives and their attribution remain in the source for review history.
-The **Full review index** at the end of the page lists suggestions and their current decisions.
-
-Comment resolution and suggestion acceptance are separate actions.
-Resolving a discussion does not accept a nearby wording change.
-Reopening it brings the discussion back without undoing text decisions.
-
-## Keep feedback readable
-
-[The reporting checklist includes the estimate, its uncertainty and the sample size]{#c5}.
-A colleague also asked us to [retain a literal notation example]{#c6}.
-
-The checklist comment demonstrates **emphasis**, a list, a link and inline code inside a discussion.
-The notation comment demonstrates plain text: its asterisks and brackets are deliberately literal.
-Imported Word comments retain that literal interpretation by default, so formatting characters do not silently change their meaning.
-
-This example uses Quarto's standard manuscript layout.
-Layout and output formats still belong in the project's _quarto.yml; review controls sit alongside them.
-Installed manuscript formats, including APAQuarto, can be selected there.
-
-## Work on your own copy {#work-locally}
-
-Download and unzip the [editable example](downloads/walkthrough.zip).
-It contains the working index.qmd, frozen reference.qmd, presentation settings and a short setup guide.
-With Quarto and Python 3.12 or later installed, run these commands from that folder:
+Install Quarto and Python 3.12 or later.
+Download and unzip the [editable example](downloads/walkthrough.zip), then run these commands in its folder:
 
 ~~~sh
 python -m venv .venv
@@ -136,41 +67,291 @@ quarto preview index.qmd --to html
 ~~~
 
 On Windows, activate the environment with `.venv\Scripts\Activate.ps1` in PowerShell.
-Change the QMD and let the HTML preview refresh while you work.
-You can also use the review commands:
+The enable command installs rendering support into this example project.
+It keeps the existing manuscript and frozen reference.
+Edit index.qmd in your editor and save; the HTML preview refreshes to show the result.
+
+To start with your own existing index.qmd instead, run this after installing the extension:
 
 ~~~sh
-quarto-review feedback --id c1
-quarto-review reply c1 --body "I agree with the revised description."
-quarto-review resolve c1
-quarto-review reopen c1
-quarto-review accept s1
-quarto-review reject s2
+quarto-review init --author "Your Name"
+quarto preview index.qmd --to html
 ~~~
 
-Each command updates the working QMD while leaving the reference frozen.
-The delete-comment command removes a whole discussion and its range markers while preserving the manuscript wording.
-Use it only when you mean to remove the discussion.
+Initialization adds review settings, enables rendering and freezes the initial reference.
+The review author identifies your new suggestions and replies; it does not replace the manuscript's title-page author information.
 
-When ready to share a Word draft, render it explicitly:
+## Edit prose and control the diff
+
+### Ordinary editing
+
+You can edit prose normally without marking every change by hand.
+For example, the frozen reference contains:
+
+~~~markdown
+Participants completed a short practice session.
+~~~
+
+The working index.qmd contains:
+
+~~~markdown
+Participants completed a five-minute practice session before the task.
+~~~
+
+**Rendered result:**
+
+Participants completed a short practice session.
+
+The extension compares the two files and displays the difference as a suggestion.
+The HTML **Original** and **Proposed** views show the alternatives; Word output represents the pending difference as native tracked changes.
+Replies, authorship and comment-status edits are excluded from this prose comparison.
+
+Keep one sentence per source line if that helps review your Markdown changes.
+A normal newline remains part of the same rendered paragraph; avoid trailing spaces that request a hard line break.
+
+### Explicit suggestions
+
+When the grouping or attribution of a change matters, write the suggestion explicitly using CriticMarkup.
+The old and proposed wording stay together, with a stable ID and author alias:
+
+~~~markdown
+The study found [a {~~large~>modest~~}{#s1 by=R} difference in recall]{#c1}.
+Participants remembered more words after spaced practice{++ than after massed practice++}{#s2 by=M}.
+The result was {--very --}{#s3 by=R}consistent across the two lists.
+~~~
+
+**Rendered result:**
+
+The study found [a {~~large~>modest~~}{#s1 by=R at=2026-09-01T09:00:00Z} difference in recall]{#c1}.
+Participants remembered more words after spaced practice{++ than after massed practice++}{#s2 by=M at=2026-09-01T09:05:00Z}.
+The result was {--very --}{#s3 by=R at=2026-09-01T09:10:00Z}consistent across the two lists.
+
+The three forms represent a replacement, insertion and deletion.
+Pending is the default.
+The surrounding span with ID c1 anchors a comment, explained in the next section.
+Use a unique ID for each suggestion or message; reuse a comment ID only to connect its passage with its discussion.
+
+Define aliases once in the QMD front matter:
+
+~~~yaml
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Alex Author
+    R: Robin Reviewer
+    M: Morgan Reviewer
+~~~
+
+The current author is A; by=R attributes that particular suggestion to Robin.
+An optional at attribute retains its date.
+Commands supply dates for new review actions, and imported attribution remains attached to the original reviewer.
+
+You can create a suggestion through a command too:
+
+~~~sh
+quarto-review suggest --text "an exact phrase" --replacement "its proposed wording"
+~~~
+
+The selected phrase must occur unambiguously in the source.
+If you have already edited the wording, the group command lets you record the intended before/after replacement explicitly.
+See the [source-format guide](https://github.com/githubpsyche/quarto-review/blob/main/docs/single-source.md) for the full syntax.
+
+## Add comments and replies
+
+### A passage and its discussion
+
+A comment has two parts in the same QMD file: a marked passage and a discussion block with the matching ID.
+This is the discussion attached to the first suggested sentence above:
+
+~~~markdown
+:::: {.review-thread #c1 by=R}
+Could we say **modest** here?
+The estimate does not support “large”.
+
+- Keep the direction of the result.
+- Qualify its magnitude.
+
+::: {.reply #r1 by=A}
+Agreed.
+I have left the replacement pending so we can compare both versions.
+:::
+::::
+~~~
+
+Put discussion blocks near their passages or collect them at the end of index.qmd.
+Their position does not determine what they comment on: the IDs do.
+Moving a complete discussion block does not create a manuscript wording change.
+
+To reply by hand, add another reply block inside the thread with a new ID and your author alias.
+A reply normally addresses the initial comment; add to=r1 to reply specifically to r1.
+Alternatively, let the command create the ID, attribution and date:
+
+~~~sh
+quarto-review reply c1 --body "I agree with the revised description."
+~~~
+
+This updates index.qmd only; the next render includes the reply in HTML and Word.
+You can create a new anchored comment with the comment command:
+
+~~~sh
+quarto-review comment --text "an exact passage" --body "Please explain this."
+~~~
+
+### Overlapping ranges
+
+When two comments cover overlapping text, use explicit start and end markers:
+
+~~~markdown
+Participants completed []{#c2-start}two practice sessions []{#c3-start}one week apart[]{#c2-end}, followed by a delayed recall test[]{#c3-end}.
+~~~
+
+**Rendered result:**
+
+Participants completed []{#c2-start}two practice sessions []{#c3-start}one week apart[]{#c2-end}, followed by a delayed recall test[]{#c3-end}.
+
+Define c2 and c3 in separate discussion blocks, just as for c1.
+In this example, Robin asks about the sessions and Morgan asks about the test timing.
+Robin's thread includes Alex's reply and a further reply to it; all of that is visible in the downloadable QMD.
+
+### Formatted and literal messages
+
+[The reporting checklist includes the estimate, its uncertainty and the sample size]{#c5}.
+A colleague also asked us to [retain a literal notation example]{#c6}.
+
+The checklist discussion uses Markdown emphasis, a numbered list, a link and inline code.
+For a message whose punctuation should remain literal, put format=plain on its opening line:
+
+~~~markdown
+:::: {.review-thread #c6 by=R format=plain}
+Keep *asterisks*, _underscores_ and [brackets] exactly as written.
+::::
+~~~
+
+Word imports retain that literal interpretation by default.
+Authored Markdown is formatted in HTML; Word discussion bodies currently keep the stored Markdown punctuation rather than translating it into native formatting.
+
+## Record decisions in the source
+
+Review controls change what you see; decisions change the working QMD.
+You can edit the attributes directly or use commands:
+
+| Action | Source representation | Command |
+| --- | --- | --- |
+| Resolve a comment | Add .resolved to the review-thread opening line | quarto-review resolve c1 |
+| Reopen a comment | Remove .resolved | quarto-review reopen c1 |
+| Accept a suggestion | Add .accepted to the suggestion's attributes | quarto-review accept s1 |
+| Reject a suggestion | Add .rejected to the suggestion's attributes | quarto-review reject s1 |
+| Return a suggestion to pending | Remove .accepted or .rejected | quarto-review pending s1 |
+
+For example:
+
+~~~markdown
+The task was {~~hard~>demanding~~}{#s4 by=R .accepted}.
+The finding {~~suggests~>proves~~}{#s5 by=M .rejected} that spacing may improve recall.
+~~~
+
+**Rendered result:**
+
+The task was {~~hard~>demanding~~}{#s4 by=R .accepted}.
+The finding {~~suggests~>proves~~}{#s5 by=M .rejected} that spacing may improve recall.
+
+Both text views show “demanding” and “suggests” because those decisions are already made.
+The alternatives remain recorded in the source.
+The comment on the [recruitment target of 40 participants]{#c4} is also resolved; its thread has .resolved on its opening line.
+
+Resolving a discussion does not accept a nearby suggestion.
+Replying does not reopen a resolved thread automatically.
+To rewrite wording with a recorded decision in the same round, first return that suggestion to pending.
+
+Use the feedback command to list review IDs, wording, authors and states:
+
+~~~sh
+quarto-review feedback
+quarto-review feedback --id c1
+quarto-review validate
+~~~
+
+An automatically detected prose edit also appears in feedback.
+Accepting or rejecting its ID first records that edit explicitly in index.qmd, so the decision has a stable source representation.
+
+Deletion is different from resolution.
+The delete-comment command removes the discussion, its replies and its range markers while preserving the manuscript wording and other annotations.
+Deleting just the discussion block would leave a dangling anchor, so use the command when removing a thread:
+
+~~~sh
+quarto-review delete-comment c1
+~~~
+
+## Render, share and start the next round
+
+While editing, keep the HTML preview running or render it on demand:
+
+~~~sh
+quarto render index.qmd --to html
+~~~
+
+In HTML, **Redline**, **Original** and **Proposed** compare pending wording.
+Marked passages open nearby discussions; author and status filters help focus the review.
+**Reading view** hides markup, comments and controls, and **Show review** restores them.
+These are display choices and do not modify the QMD or exported Word draft.
+
+Select layout and output formats through the normal _quarto.yml settings.
+For example:
+
+~~~yaml
+project:
+  type: manuscript
+manuscript:
+  article: index.qmd
+format:
+  html: default
+  docx: default
+~~~
+
+The enable command adds the review integration while retaining your format settings.
+This page uses Quarto's standard manuscript layout; installed styles such as APAQuarto can be selected in your own project.
+Keep the bibliography, figures and other presentation settings there too.
+
+When ready to send a draft to collaborators, render Word explicitly:
 
 ~~~sh
 quarto render index.qmd --to docx
 ~~~
 
-The [Word example](index.docx) contains native comments, replies and pending tracked changes generated from this same document.
+The [example Word draft](index.docx) contains native comments, replies and pending tracked changes generated from the same working source as this page.
 HTML views and filters do not change what is exported.
-Discussion Markdown currently retains its stored punctuation in Word rather than becoming native Word formatting.
 
-To start from a reviewed Word document, import it into a new directory:
+Freeze a new reference only when you deliberately begin a new review round:
+
+~~~sh
+quarto-review reference --new-round
+~~~
+
+This archives the previous reference and captures the current annotated QMD as the next baseline.
+Ordinary rendering never advances the baseline.
+Keep the source version corresponding to any Word draft you send so you can compare returned feedback with it.
+
+## Bring Word feedback into the project
+
+You can begin with collaborators' feedback in a Word document:
 
 ~~~sh
 quarto-review import-docx reviewed.docx --into candidate --author "Your Name"
+cd candidate
+quarto-review enable
+quarto preview index.qmd --to html
 ~~~
 
-Import preserves supported review records and archives the original Word file.
-Inspect a returned draft as a candidate alongside the version you sent; the single-source workflow does not automatically merge independently edited Word returns.
-See the [format guide](https://github.com/githubpsyche/quarto-review/blob/main/docs/single-source.md) and [tested compatibility](https://github.com/githubpsyche/quarto-review/blob/main/docs/status.md) for details.
+Import creates a new directory with a working QMD, frozen reference, extracted assets and an archive of the original Word document.
+Supported comments, replies, ranges, reviewer attribution and suggested changes are retained for editing and export.
+Keep the original Word assets and native review-data records that the importer supplies.
+
+**Current boundary:** this is not automatic synchronisation between a live Word document and your QMD.
+A returned Word draft is imported as a separate candidate for comparison with the version sent; the current single-source workflow does not automatically merge independently edited returns.
+Word-to-Quarto conversion also does not promise identical original Word page layout.
+
+See [tested compatibility and limits](https://github.com/githubpsyche/quarto-review/blob/main/docs/status.md) for supported constructs and verification evidence, and the [source-format reference](https://github.com/githubpsyche/quarto-review/blob/main/docs/single-source.md) for complete syntax.
 
 <!-- Discussion positions do not determine their anchors. -->
 

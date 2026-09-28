@@ -1,10 +1,13 @@
 # Quarto review
 
-[Open the interactive walkthrough](https://githubpsyche.github.io/quarto-review/) · [Download its source](https://githubpsyche.github.io/quarto-review/downloads/walkthrough.zip)
+**Write and revise your manuscript in Quarto while collaborators review Word drafts with native comments and tracked changes.**
+Quarto review brings supported Word feedback into editable QMD, keeps discussions attached to the text, and exports Word drafts with native review information.
+Work in your preferred editor or with a coding assistant, inspect an HTML preview, and render Word when you are ready to share.
 
-Keep manuscript text, suggested wording and complete review discussions in one QMD file.
-A frozen reference supplies the comparison for ordinary edits.
-Quarto produces an HTML review and Word documents with native comments, replies and tracked changes.
+Keep manuscript text, suggestions, comments, replies and decisions together in index.qmd.
+A frozen reference supplies the comparison for ordinary edits; explicit CriticMarkup lets you control how proposed changes are presented.
+
+[Read the guide and live examples](https://githubpsyche.github.io/quarto-review/) · [Download the example source](https://githubpsyche.github.io/quarto-review/downloads/walkthrough.zip)
 
 The current single-source format is schema 2.
 It replaces the separately maintained review.yml used by schema 1.
@@ -160,11 +163,11 @@ Development fixtures must stay separate from that manuscript.
 See [status and limits](docs/status.md), [architecture](docs/design.md), and [performance](docs/performance.md).
 The historic interactive Word verification applies to the prior source format and exporter; the new format has separate automated tests.
 
-## Public walkthrough
+## Public guide and examples
 
-The [live demo](https://githubpsyche.github.io/quarto-review/) is a synthetic manuscript that teaches the workflow using its own review annotations.
+The [public guide](https://githubpsyche.github.io/quarto-review/) explains the local files and editing workflow, pairing source examples with their rendered review annotations.
 It demonstrates pending replacements, insertions and deletions, ordinary edits against a frozen reference, overlapping comments, threaded replies, resolution, accepted/rejected suggestions, Markdown discussions and literal imported-style text.
-Visitors can try the reading controls and download both the Word output and editable example.
+Readers can follow the source-to-output examples, try the HTML controls, and download both the Word output and editable project.
 
 Its maintained source is in [examples/walkthrough](examples/walkthrough).
 The [demo build guide](docs/demo.md) explains local builds and the GitHub Pages publishing workflow.

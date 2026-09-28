@@ -1,14 +1,16 @@
-# Public walkthrough
+# Public guide and examples
 
 The public site is published at https://githubpsyche.github.io/quarto-review/.
-Its manuscript doubles as a walkthrough; every feature shown in the text is backed by review data in the example itself.
+The page introduces the purpose of the extension, explains the local source files, and pairs editing examples with rendered review features.
+HTML controls demonstrate the results after the source workflow is explained.
 All names, study details and results are synthetic.
 
 ## Source and outputs
 
 Maintain examples/walkthrough/index.qmd, reference.qmd, _quarto.yml and README.md.
 The frozen reference intentionally differs from the working document in the practice-session sentence.
-Keep unrelated walkthrough explanations consistent between them so they do not become unintended manuscript suggestions.
+When revising this synthetic documentation fixture, keep its explanations consistent between working and reference files so they do not become unintended manuscript suggestions.
+This fixture maintenance is not the workflow for a live review round, whose reference must remain frozen.
 
 The build uses a temporary copy of those four files.
 It enables the development extension there, creates an editable ZIP and renders HTML and Word using Quarto's standard manuscript format.

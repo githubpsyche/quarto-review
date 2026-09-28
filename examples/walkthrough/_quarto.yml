@@ -12,7 +12,7 @@ format:
   html:
     theme: cosmo
     toc: true
-    toc-title: Walkthrough
+    toc-title: Guide
     number-sections: false
     code-copy: true
   docx: default
