@@ -197,3 +197,20 @@ Readers can follow the source-to-output examples, try the HTML controls, and dow
 
 Its maintained source is in [examples/walkthrough](examples/walkthrough).
 The [demo build guide](docs/demo.md) explains local builds and the GitHub Pages publishing workflow.
+
+## Tracking subsequent Word edits
+
+To enable Word's Track Changes setting in newly rendered review files, add this project-wide setting to `_quarto.yml`:
+
+```yaml
+quarto-review:
+  word:
+    track-changes: true
+```
+
+Set it to `false` to disable that setting, or omit it to preserve the reference document's setting.
+This option is read from the project `_quarto.yml`; it is not currently a per-document or profile override.
+It governs subsequent edits in Word and does not accept or reject existing revisions, change comment resolutions, or lock editing.
+The post-render hook applies it only to newly rendered Word outputs, before native review finishing; an HTML-only render leaves Word files alone.
+Updating the installed `finish.py` and `word_options.py` supports this option with an existing pinned 0.2 runtime.
+The hook uses that runtime's interpreter and dependencies rather than installing development code into it.
