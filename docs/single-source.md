@@ -1,4 +1,4 @@
-# Single-source review format
+# Single-source review format and commands
 
 Schema 2 stores one complete, editable review document in index.qmd.
 Its frozen counterpart defaults to reference.qmd.
@@ -156,6 +156,36 @@ Ordinary prose edits are compared with the frozen reference.
 Discussion edits and attribution/state changes are excluded from that prose comparison.
 An automatically detected edit can be made explicit when a command accepts or rejects it.
 
+## Review commands
+
+Run these commands in the project directory, or pass `--project PATH` to select it explicitly.
+`feedback` lists the current review items; `feedback --id c1` inspects a particular thread.
+The alternatives below are separate operations, not a sequence to run on one item.
+
+| Action | Command |
+| --- | --- |
+| List feedback | `quarto-review feedback` |
+| Reply to a thread | `quarto-review reply c1 --body "I have clarified the claim."` |
+| Resolve a discussion | `quarto-review resolve c1` |
+| Reopen a discussion | `quarto-review reopen c1` |
+| Remove a discussion and its anchors | `quarto-review delete-comment c1` |
+| Accept a suggested wording | `quarto-review accept s1` |
+| Reject a suggested wording | `quarto-review reject s1` |
+| Return a wording decision to pending | `quarto-review pending s1` |
+| Add a comment on a passage | `quarto-review comment --text "an exact passage" --body "Explain this."` |
+| Suggest a replacement | `quarto-review suggest --text "large" --replacement "modest"` |
+| Give an ordinary edit an explicit suggestion record | `quarto-review group --text "the wording already edited" --before "the previous wording"` |
+| Validate source and review relationships | `quarto-review validate` |
+
+An open comment still has a question, action or decision to address; a pending change awaits acceptance or rejection of its wording.
+After implementing and checking an agreed response, you can reply and resolve the comment while leaving its wording changes pending for collaborator review.
+Resolving a comment preserves its discussion and anchor and does not accept associated changes.
+Deleting a thread removes its messages and range references while retaining manuscript text, suggestions and overlapping comments.
+
+Commands validate and atomically replace the working QMD, stopping if they detect an intervening edit.
+They do not lock out another writer; see [saving with other editors](installation.md#saving-with-other-editors).
+Edit the working source, rather than its rendered outputs or frozen reference.
+
 ## Compacting decided suggestions
 
 Settled suggestions do not have to remain browsable to generate a reviewed Word document.
@@ -221,6 +251,18 @@ Capturing a reference freezes the complete QMD, not a separate collection of cur
 The extension never updates it during ordinary rendering.
 An explicit compact operation updates its settled prose decisions without accepting other pending edits.
 A new round preserves the previous reference under review/rounds before replacing it.
+
+Start a new review round explicitly:
+
+~~~sh
+quarto-review reference --new-round
+~~~
+
+For executable manuscripts, capture executed inputs with the reference:
+
+~~~sh
+quarto-review reference --new-round --execute --to html --to docx
+~~~
 
 When executed input has been captured, the frozen QMD carries format-specific Markdown under review.compiled.
 This preserves the output needed for comparison without introducing a second active review file.

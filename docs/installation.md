@@ -9,12 +9,12 @@ The instructions below select version 0.3.2; its validation scope is recorded in
 ~~~sh
 git clone --branch v0.3.2 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
-python -m venv .venv-user
+python3 -m venv .venv-user
 source .venv-user/bin/activate
 python -m pip install .
 ~~~
 
-On Windows use `.venv-user\Scripts\Activate.ps1` in PowerShell.
+On Windows create the environment with `py -3 -m venv .venv-user` and activate it with `.venv-user\Scripts\Activate.ps1` in PowerShell.
 Record `git rev-parse HEAD` with the installed version; an unpinned default branch can change.
 For a built wheel, install its actual filename with `python -m pip install /path/to/quarto_review-0.3.2-py3-none-any.whl`.
 Do not use a development editable installation for a manuscript that must stay on a fixed runtime.
@@ -36,6 +36,21 @@ The review author identifies new feedback and does not replace the title-page au
 Enable does not advance reference.qmd or rewrite index.qmd.
 Initialization and explicit review commands do change source; inspect the resulting source diff.
 The environment must remain available after installation because renders call its executables.
+
+## Tracking subsequent Word edits
+
+To enable Word's Track Changes setting in newly rendered review files, add this project-wide setting to `_quarto.yml`:
+
+~~~yaml
+quarto-review:
+  word:
+    track-changes: true
+~~~
+
+Set it to `false` to disable that setting, or omit it to preserve the reference document's setting.
+This option is read from the project `_quarto.yml`; it is not currently a per-document or profile override.
+It governs subsequent edits in Word and does not accept or reject existing revisions, change comment resolutions, or lock editing.
+The post-render hook applies it only to newly rendered Word outputs, before native review finishing; an HTML-only render leaves Word files alone.
 
 ## Upgrade, clone or move a project
 

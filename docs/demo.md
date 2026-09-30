@@ -5,6 +5,10 @@ The page introduces the purpose of the extension, explains the local source file
 HTML controls demonstrate the results after the source workflow is explained.
 All names, study details and results are synthetic.
 
+The repository README uses `docs/images/review-preview.png`, a browser capture of the rendered `examples/single-source-proposal` fixture.
+It shows the same pending replacement, overlapping comments and existing author reply as the editable quickstart source.
+When refreshing it, render a disposable copy of that fixture with the version selected by the README, capture its HTML preview in Redline with open comments, and check the image against the source.
+
 ## Source and outputs
 
 Maintain examples/walkthrough/index.qmd, reference.qmd, _quarto.yml and README.md.
