@@ -1,0 +1,45 @@
+---
+title: Word review with citations and cleanup
+author: Example Author
+format:
+  html: default
+  docx: default
+bibliography: native-word-citations.bib
+quarto-review:
+  bibliography: source
+review:
+  schema: 2
+  author: A
+  authors:
+    A: Example Author
+    R: Example Reviewer
+---
+
+The study found [a {~~large~>modest~~}{#s1 by=A at=2026-09-01T09:00:00Z} effect]{#c1}.
+The {~~preliminary~>completed~~}{#s0 .accepted by=A at=2026-09-01T08:30:00Z} analysis used a synthetic dataset.
+Evidence [@brown2020; []{#c2-start}@smith2021[]{#c2-end}{++; @smith2022++}{#s2 by=A at=2026-09-01T09:10:00Z}] supports the account.
+The follow-up was brief.
+
+# References
+
+::: {#refs}
+
+[]{#ref-brown2020}Brown, B. (2020). Context in a synthetic task.
+
+[]{#ref-smith2021}Smith, A. (2021). [A reviewed reference entry]{#c3}.
+
+[]{#ref-smith2022}Smith, A. (2022). A second synthetic study.
+
+:::
+
+:::: {.review-thread #c1 by=R at=2026-09-01T08:00:00Z}
+Please qualify the magnitude.
+::::
+
+:::: {.review-thread #c2 by=R at=2026-09-01T08:10:00Z}
+Please check the second reference.
+::::
+
+:::: {.review-thread #c3 by=R at=2026-09-01T08:20:00Z}
+Keep this reviewed reference entry.
+::::

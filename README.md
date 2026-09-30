@@ -62,12 +62,12 @@ Read the [source-format guide](docs/single-source.md) for overlapping ranges, re
 
 ## Install and start
 
-Version 0.2.1 includes an explicitly reconciled review cycle checked in Word for Mac.
+Version 0.3.0 adds native citation review and cleanup of settled prose suggestions, checked together in an explicitly reconciled Word for Mac cycle.
 See the [release evidence](docs/release.md) for the tested workflow and limits.
 Install Python 3.12 or later, Git and Quarto (tested with 1.8.27), then install the selected source checkout:
 
 ~~~sh
-git clone --branch v0.2.1 https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.3.0 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
 python -m venv .venv-user
 source .venv-user/bin/activate
@@ -75,7 +75,7 @@ python -m pip install .
 ~~~
 
 On Windows, activate with `.venv-user\Scripts\Activate.ps1` in PowerShell.
-The command above selects the v0.2.1 tag; use a different verified tag explicitly when upgrading.
+The command above selects the v0.3.0 tag; use a different verified tag explicitly when upgrading.
 Keep the environment in place while its manuscript projects use it.
 See [installation, upgrades and removal](docs/installation.md) for project-local changes and moving a project.
 
@@ -111,7 +111,7 @@ See the [source and HTML guide](docs/single-source.md#comments-and-ranges) for s
 
 ## Native citations
 
-Citation support requires a checkout newer than `v0.2.1`; the installation example above is pinned to that release.
+Citation support is included in `v0.3.0`, selected by the installation example above.
 
 Keep citations as ordinary `[@key]` and `@key` source, with reference data in the project’s bibliography.
 Word import can recover explicit reference links when supplied with `--bibliography references.bib`.
@@ -148,6 +148,32 @@ An edit detected before saving stops the operation.
 The check and replacement do not lock out another writer; use one writer at a time for each QMD.
 Rendered outputs and the reference are not authoritative copies to edit.
 
+### Keeping the source readable after review
+
+Edit prose and pending CriticMarkup by hand as usual.
+After recording decisions with `.accepted` or `.rejected`, or the review commands, remove settled prose suggestions in one batch:
+
+~~~sh
+quarto-review compact --dry-run
+quarto-review compact
+~~~
+
+Accepted wording becomes ordinary prose; rejected wording disappears.
+The decided suggestions and their inline provenance leave the active QMD and its HTML review cards.
+Pending suggestions, comment anchors, replies and resolved threads remain.
+This does not require a command for each wording edit or a second hand-maintained review file.
+
+Cleanup also applies the settled decisions to the comparison reference, while keeping unrelated ordinary edits pending.
+It verifies both document readings before saving, checks for concurrent edits and restores the reference if saving the working source fails.
+The original Word archives remain unchanged.
+Use Git or your existing backups if you need to revisit retired suggestions: they can no longer be reopened by ID in the current source.
+No extra history archive is created by this command.
+
+Native formatting and equation records that Word export still needs are retained and reported.
+A decision that would discard a pending nested suggestion is retained too.
+Cleanup currently requires schema 2 and a reference without captured executed inputs; it stops without changes for an executed reference.
+See the [source format](docs/single-source.md#compacting-decided-suggestions) for the cleanup contract.
+
 Start a new review round explicitly:
 
 ~~~sh
@@ -172,7 +198,7 @@ This preserves native attribution and source identities.
 Returned Word feedback is reviewed against an explicitly selected prior version; schema 2 does not silently merge it into an active manuscript.
 The older automatic receive workflow remains specific to schema 1.
 Follow the [worked review round](docs/review-round.md) to retain the version sent, examine a returned candidate and apply explicit decisions without replacing newer local work.
-That example includes a reproducible scripted check; the separate [Word application check](docs/release.md#current-format-native-word-check) also passed for 0.2.1.
+That example includes a reproducible scripted check; the separate [Word application check](docs/release.md#current-format-native-word-check) also passed for 0.3.0, including citations and cleanup.
 
 Convert a schema-1 project and its frozen reference into a separate candidate:
 

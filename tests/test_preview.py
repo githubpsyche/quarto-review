@@ -65,18 +65,37 @@ def test_preview_refreshes_review_metadata_and_reference(tmp_path, file_preview)
 
     def refresh(action, predicate):
         # Follow Quarto's actual browser protocol: wait for its reload message
-        # before requesting the page. Polling GET during rendering creates a
-        # second, competing render in Quarto's project preview.
+        # before requesting the page. An earlier render can still send its
+        # reload after the action, so keep listening until the requested state
+        # appears. Polling GET creates competing renders in project preview.
         with connect(f"ws://127.0.0.1:{port}/", proxy=None, close_timeout=1) as client:
             action()
             deadline = time.monotonic() + 25
-            while True:
-                message = client.recv(timeout=max(0, deadline - time.monotonic()))
-                if message.startswith("reload"):
+            while time.monotonic() < deadline:
+                try:
+                    message = client.recv(timeout=deadline - time.monotonic())
+                except TimeoutError:
                     break
-        with urlopen(f"http://127.0.0.1:{port}/index.html", timeout=25) as response:
-            page = response.read().decode()
-        assert predicate(page), (
+                if not message.startswith("reload"):
+                    continue
+                if not file_preview:
+                    # Project preview defers rendering until the reload GET.
+                    await_page(predicate)
+                    return
+                # File preview can notify while its finishing hook is still
+                # replacing HTML. Wait for the requested artifact before GET,
+                # without starting a competing project render by polling HTTP.
+                rendered = tmp_path / "_output/index.html"
+                while time.monotonic() < deadline:
+                    assert process.poll() is None, log.read_text()
+                    try:
+                        if predicate(rendered.read_text()):
+                            await_page(predicate)
+                            return
+                    except OSError:
+                        pass
+                    time.sleep(0.1)
+        pytest.fail(
             "The reloaded page has stale review state:\n" + log.read_text()[-8000:]
         )
 

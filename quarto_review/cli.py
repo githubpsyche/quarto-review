@@ -91,6 +91,16 @@ def _parser() -> argparse.ArgumentParser:
     reference.add_argument("--include", action="append", default=[])
     reference.add_argument("--execute", action="store_true")
     reference.add_argument("--to", action="append", default=[])
+    compacted = commands.add_parser(
+        "compact",
+        help="Collapse decided prose suggestions in source and comparison reference.",
+    )
+    compacted.add_argument("--project", type=Path, default=Path.cwd())
+    compacted.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report removals and retained records without writing files.",
+    )
     feedback = commands.add_parser(
         "feedback", help="List review threads and suggestions as JSON."
     )
@@ -175,6 +185,15 @@ def main(argv: list[str] | None = None) -> int:
     """Run one operation, writing machine-readable review records to stdout."""
     arguments = _parser().parse_args(argv)
     try:
+        if arguments.command == "compact":
+            from quarto_review.compaction import compact
+
+            print(
+                json.dumps(
+                    compact(arguments.project, dry_run=arguments.dry_run), indent=2
+                )
+            )
+            return 0
         if arguments.command == "migrate":
             from quarto_review.migration import migrate
 

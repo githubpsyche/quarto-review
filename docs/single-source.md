@@ -98,7 +98,7 @@ The replication was {++independent ++}{#s2 by=A}.
 Pending is implicit.
 Add .accepted or .rejected to a suggestion's attributes to record its disposition.
 Removing either class returns it to pending.
-Both wording alternatives remain available.
+Both wording alternatives remain available until an explicit cleanup.
 HTML shows accepted wording as ordinary manuscript text and omits rejected wording.
 To inspect the retained decision, choose Changes under Review, then Accepted or Rejected under Status.
 Cards show the original and proposed text, author and status beside the passage.
@@ -156,6 +156,51 @@ Ordinary prose edits are compared with the frozen reference.
 Discussion edits and attribution/state changes are excluded from that prose comparison.
 An automatically detected edit can be made explicit when a command accepts or rejects it.
 
+## Compacting decided suggestions
+
+Settled suggestions do not have to remain browsable to generate a reviewed Word document.
+`quarto-review compact` removes decided prose records from the working QMD and applies those decisions to its comparison reference.
+For example:
+
+~~~markdown
+# {~~Old title~>New title~~}{#title by=A}{++ unwanted suffix++}{#suffix .rejected by=R}
+~~~
+
+becomes:
+
+~~~markdown
+# {~~Old title~>New title~~}{#title by=A}
+~~~
+
+The pending title replacement retains its identity and attribution.
+The rejected suffix and its attached Word provenance disappear from active source and subsequent review cards.
+Accepted replacements retain their chosen text as ordinary Markdown; accepted deletions and rejected insertions leave no text.
+No render or cleanup is triggered by typing a decision class or running accept/reject: run compact once when ready to retire the accumulated decisions.
+Use `--dry-run` to inspect the IDs that would be removed and reasons for records that must stay.
+
+The command updates both index.qmd and the configured review.reference.
+It reverses only automatically inferred ordinary edits when constructing the new comparison reference, so it does not accept unrelated work or start a new review round.
+Explicit pending suggestions keep both alternatives, IDs, dates and author attribution.
+Ordinary edits are inferred again against the updated reference; their temporary IDs may change.
+After cleanup, ordinary edits to the settled wording are tracked normally without reopening a retired suggestion.
+
+Comment definitions, resolution states, replies and imported Word identities are preserved.
+An anchor entirely on discarded wording becomes a point anchor; a surviving range retains its text.
+Resolved threads remain available to browse and reopen.
+Original Word archives are neither removed nor rewritten.
+Settled native formatting or equation records remain when export still depends on their decisions, and a containing decision remains if its discarded text contains a pending suggestion or native record.
+These retained records are reported rather than silently flattened.
+
+Both candidate files are parsed and their original/proposed readings checked before saving.
+Both inputs are checked for concurrent edits; the reference is restored if the source write fails.
+The two file replacements are not one filesystem transaction, so run cleanup between editing sessions and keep the usual version-control history.
+The command does not commit, create history copies, render documents or install a runtime.
+After cleanup, `pending ID` cannot recover retired alternatives; recover an earlier version through Git or your own backups.
+
+Cleanup supports schema 2 with an authored QMD reference.
+It refuses references containing review.compiled executed inputs instead of silently retaining stale generated comparisons.
+Unsupported cleanup cases leave both files unchanged.
+
 ## Native information
 
 Some imported Word information has no concise prose notation.
@@ -166,7 +211,7 @@ The JSON payload stores provenance or, for native objects, the object's descript
 The converter retains imported identities, dates, per-reply states and native relationships.
 
 This technical information is not a separate editable database.
-It must not be removed simply to shorten a file.
+It must not be removed by hand simply to shorten a file; compact removes only settled prose records that are no longer needed.
 Original Word packages can remain immutable dependencies for native equations, formatting revisions or comment relationships.
 Unsupported constructs fail with a diagnostic rather than being silently flattened.
 
@@ -174,6 +219,7 @@ Unsupported constructs fail with a diagnostic rather than being silently flatten
 
 Capturing a reference freezes the complete QMD, not a separate collection of current comment metadata.
 The extension never updates it during ordinary rendering.
+An explicit compact operation updates its settled prose decisions without accepting other pending edits.
 A new round preserves the previous reference under review/rounds before replacing it.
 
 When executed input has been captured, the frozen QMD carries format-specific Markdown under review.compiled.

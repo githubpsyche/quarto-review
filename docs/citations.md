@@ -1,6 +1,6 @@
 # Native citations and review
 
-This guide describes citation support in the development checkout, newer than the tagged `v0.2.1` release.
+This guide describes native citation support in version 0.3.0. See [release evidence](release.md) for automated checks and the completed Word for Mac cycle.
 
 ## The author’s workflow
 
@@ -48,7 +48,7 @@ Narrative year groups and possessive author forms retain their narrative role, u
 Code, equations and discussion bodies are left alone.
 An unknown member prevents partial conversion of its group.
 Decided citation text is retained and reported; applying recovery stops before writing either file while such text remains.
-Those retained records require separate reconciliation; normalization does not retire review history.
+Those retained records require separate reconciliation; normalization does not retire review history. Once their decisions are final, `quarto-review compact` can retire settled prose records from source and reference before normalization; review its dry run first.
 This avoids converting only one side of the comparison after a decision.
 References containing replacements across citation members are also retained for explicit reconciliation.
 
@@ -98,6 +98,8 @@ Synthetic tests cover grouped author–date and numeric citations, narrative edi
 Review cards use the formatted passage, so the cards do not introduce extra citations or independently assign disambiguation suffixes.
 Historical citation alternatives no longer present as pending manuscript ranges are explicitly labelled as source syntax.
 Comment and reply bodies continue to use basic CommonMark; citations within discussions are not processed.
+
+Word can split one citation suggestion into separate tracked fragments at hyperlink boundaries, such as the separator and added year. Accept or reject every fragment belonging to that suggestion before reconciling its QMD decision. The version 0.3.0 application check rejected both fragments and retained the adjacent member comment, reply and resolution.
 
 For internal group ranges, citation links must remain available.
 The installed late filter enables them when necessary; an explicit `link-citations: false` is incompatible and produces an error.

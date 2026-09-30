@@ -2,12 +2,12 @@
 
 The package requires Python 3.12 or later and Quarto; development and CI use Quarto 1.8.27.
 Node is used only for browser tests, not for manuscript editing or rendering.
-The instructions below select version 0.2.1; its validation scope is recorded in [release evidence](release.md).
+The instructions below select version 0.3.0; its validation scope is recorded in [release evidence](release.md).
 
 ## Install a chosen checkout
 
 ~~~sh
-git clone --branch v0.2.1 https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.3.0 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
 python -m venv .venv-user
 source .venv-user/bin/activate
@@ -16,7 +16,7 @@ python -m pip install .
 
 On Windows use `.venv-user\Scripts\Activate.ps1` in PowerShell.
 Record `git rev-parse HEAD` with the installed version; an unpinned default branch can change.
-For a built wheel, install its actual filename with `python -m pip install /path/to/quarto_review-0.2.1-py3-none-any.whl`.
+For a built wheel, install its actual filename with `python -m pip install /path/to/quarto_review-0.3.0-py3-none-any.whl`.
 Do not use a development editable installation for a manuscript that must stay on a fixed runtime.
 
 In the manuscript directory, `quarto-review init --author "Your Name"` initializes an existing plain index.qmd.
@@ -28,7 +28,7 @@ The review author identifies new feedback and does not replace the title-page au
 | Location | Change |
 | --- | --- |
 | `_extensions/quarto-review/` | Copies the filters, preview assets and finishing hook; adds generated preview dependencies. |
-| `_quarto.yml` | Adds a pre-AST filter, review paths and a post-render hook while retaining format settings. YAML comments and formatting can be rewritten. |
+| `_quarto.yml` | Adds a pre-AST review filter, a post-Quarto citation filter, review paths and a post-render hook while retaining format settings. YAML comments and formatting can be rewritten. |
 | `_environment.local` | Sets QUARTO_PANDOC, QUARTO_REVIEW_PROJECT and QUARTO_REVIEW_COMMAND to local absolute paths. |
 | `.quarto/review/runtime.json` | Records the original Pandoc executable and reader path. |
 | `.gitignore` | Ignores generated runtime and preview dependencies. |
@@ -53,7 +53,7 @@ Preserve any pre-existing custom Pandoc configuration before changing it.
 
 There is no uninstall command yet.
 Save the source and original Word assets first.
-Remove only the quarto-review pre-AST filter, its post-render hook and its top-level settings from _quarto.yml.
+Remove only the quarto-review pre-AST and post-Quarto citation filters, its post-render hook and its top-level settings from _quarto.yml.
 Remove the three generated variables from _environment.local, restoring any original QUARTO_PANDOC setting that existed before enable.
 Remove the copied _extensions/quarto-review directory and generated .quarto/review runtime files when no running preview needs them.
 Retain unrelated project settings and ignore rules.
