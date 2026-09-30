@@ -16,4 +16,5 @@ format:
     number-sections: false
     code-copy: true
   docx: default
+bibliography: references.bib
 lang: en

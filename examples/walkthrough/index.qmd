@@ -61,7 +61,7 @@ Download and unzip the [editable example](downloads/walkthrough.zip), then run t
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.2.1
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.0
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~
@@ -231,6 +231,24 @@ Keep *asterisks*, _underscores_ and [brackets] exactly as written.
 Word imports retain that literal interpretation by default.
 Authored Markdown is formatted in HTML; Word discussion bodies currently keep the stored Markdown punctuation rather than translating it into native formatting.
 
+## Review native citations
+
+Keep citations in ordinary Quarto source, with their records in references.bib.
+The following fictional studies demonstrate a comment on one reference and a pending addition to the same group:
+
+~~~markdown
+Evidence [@brown2020; []{#c7-start}@smith2021[]{#c7-end}{++; @smith2022++}{#s6 by=R}] supports the account.
+~~~
+
+**Rendered result:**
+
+Evidence [@brown2020; []{#c7-start}@smith2021[]{#c7-end}{++; @smith2022++}{#s6 by=R at=2026-09-01T09:40:00Z}] supports the account.
+
+The comment stays attached to Smith (2021), and the pending addition uses the same formatted citation as the manuscript.
+Word can split a citation addition into tracked fragments for its separator and year; decide all its fragments when reviewing that change.
+After importing Word feedback with an explicit bibliography, review the recovery report for retained cases.
+The [citation guide](https://github.com/githubpsyche/quarto-review/blob/main/docs/citations.md) explains bibliography-assisted import and normalization, reviewed source reference lists, and ambiguous ranges that require whole-group comments.
+
 ## Record decisions in the source
 
 Review controls change what you see; decisions change the working QMD.
@@ -283,6 +301,25 @@ Deleting just the discussion block would leave a dangling anchor, so use the com
 quarto-review delete-comment c1
 ~~~
 
+## Retire settled prose suggestions
+
+Accepted and rejected alternatives remain in the source until you explicitly retire them.
+Once their decisions are final, inspect a cleanup and then apply it:
+
+~~~sh
+quarto-review compact --dry-run
+quarto-review compact
+~~~
+
+In this example, cleanup replaces s4 with plain “demanding” and s5 with plain “suggests”.
+It applies those same decisions to reference.qmd so they do not reappear as ordinary edits.
+Pending suggestions, the newer practice-session wording, and all discussions remain available for review.
+Resolved comments and their replies are retained.
+
+Use version control or a backup to recover retired alternatives; their old IDs can no longer be returned to pending.
+Native records required to reproduce Word formatting or equations remain in the source and are reported.
+Cleanup does not start a new review round.
+
 ## Render, share and start the next round
 
 While editing, keep the HTML preview running or render it on demand:
@@ -292,7 +329,7 @@ quarto render index.qmd --to html
 ~~~
 
 In HTML, **Redline**, **Original** and **Proposed** compare pending wording.
-Review starts with Comments; select Changes to inspect suggestions, then filter their status to Pending, Accepted or Rejected.
+Review initially shows open comments and pending changes. Select Changes to focus on suggestions, then filter their status to Pending, Accepted or Rejected.
 Change cards show removed and added wording alongside the author and decision.
 Previous and Next move through matching records, including accepted deletions and rejected insertions that leave no text in the manuscript.
 A Δ marker locates each change while changes are selected.
@@ -416,4 +453,8 @@ See [working locally](#work-locally) to reply to this discussion.
 :::: {.review-thread #c6 by=R at=2026-09-01T09:35:00Z format=plain}
 Keep *asterisks*, _underscores_ and [brackets] exactly as written.
 This synthetic message demonstrates the literal format used for imported Word text.
+::::
+
+:::: {.review-thread #c7 by=R at=2026-09-01T09:41:00Z}
+Please check that the second reference supports this account.
 ::::

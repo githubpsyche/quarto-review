@@ -1,10 +1,50 @@
 # Release checks and evidence
 
-This page records the checks for version 0.2.1.
+This page records the checks for version 0.3.0 and preserves the earlier 0.2.1 evidence below.
 Run these checks on the exact checkout that will be tagged.
 Do not treat earlier schema-1 Word checks as evidence for a completed schema-2 application cycle.
 
-## Recorded evidence
+## Version 0.3.0 evidence
+
+The release includes native citation review and explicit cleanup of settled prose suggestions.
+The isolated macOS release checkout passed 246 public Python tests, with four optional checks skipped and four private tests deselected. The skips require three installed-APAQuarto checks and Jupyter execution.
+Lint and all six synthetic browser groups passed, as did the explicit review round, an independent installed-wheel check rendering HTML and Word with citations and cleanup, and the updated guide build.
+The live-preview check now handles Quarto project and file preview separately: project preview renders on its reload request; file preview waits for the finished HTML before requesting it.
+The Word application check passed on 30 September 2026 using Word for Mac 16.113.3 (16.113.26092714), macOS 26.5.2 (25F84), Python 3.12.13 and Quarto 1.8.27.
+Its library input SHA-256 was `3074af18395a2585f99bca89050447a6242f1c3220a0fde5d39af9e659fcaad7`.
+The final Word-written file had SHA-256 `db0954c42796c524d03419c5c3e061dbea04641123e57ff598efae746cc775ff`.
+This fingerprint identifies package source, including its bundled extension; later documentation and test additions do not change that runtime.
+
+## Current-format native Word check
+
+Use the fictional [native-word-citations.qmd](../tests/fixtures/native-word-citations.qmd) and its bibliography.
+The helper prepares a fresh isolated project and verifies each file after the native actions; it does not operate the Word UI or merge returns automatically.
+Run each phase from the development environment:
+
+~~~sh
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_native_citations.py prepare --output work/native-citations
+~~~
+
+1. Open sent.docx in Word. Confirm no repair warning, a readable manuscript and comments, and pending prose and citation changes.
+2. Accept large → modest. Reject the added Smith (2022) citation, including its separate separator and year fragments. Reply to the magnitude thread with “The revised magnitude addresses my concern.” and to the second-reference thread with “The second reference is correct.” Resolve both; leave the reviewed-reference-entry thread open. Save returned-native.docx in the test directory.
+3. Run the reconcile phase below. It imports a separate candidate, explicitly applies those decisions and discussions, retains the newer local two-day edit, and checks that compacting s0, s1 and s2 preserves the rendered readings, native revision wording and attribution, and complete discussion records. The original Word archive and bibliography remain unchanged.
+4. Open reconciled.docx in Word, inspect its citation, comments and remaining local tracked changes, and save reopened-native.docx. Run verify to import it independently and check those records again.
+
+~~~sh
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_native_citations.py reconcile --output work/native-citations
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_native_citations.py verify --output work/native-citations
+~~~
+
+Both candidate imports left the working source, reference and bibliography unchanged.
+Cleanup updated settled decisions in both QMD files while retaining the newer local wording as pending changes.
+The member comment stayed on Smith (2021), and the reviewed source bibliography entry retained its independent comment.
+Word split the added citation into two tracked fragments; both had to be rejected.
+On the second save, Word renumbered native review IDs and rounded revision timestamps to minutes. Verification matched complete comment records uniquely and checked their parent relationships under that mapping, along with ordered revision wording and attribution.
+Ordinary prose edits receive render-time revision dates; fixed message timestamps remained unchanged.
+Raw native files and user-profile attribution stay in ignored local test output, not the published download.
+Windows, Word for the web and arbitrary native formatting or embedded objects are outside this application check.
+
+## Historical 0.2.1 evidence
 
 Version 0.2.1 was checked on macOS 26.5.2, Python 3.12.13, Quarto 1.8.27 and Node 24.15.0.
 The public Python suite passed 185 tests, with four optional checks skipped and four private tests deselected.
@@ -29,7 +69,7 @@ npx --no-install playwright install chromium
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/run_browser_checks.py
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_review_round.py --output work/release-round
 UV_PROJECT_ENVIRONMENT=.venv-dev uv build --wheel
-UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_package.py dist/quarto_review-0.2.1-py3-none-any.whl
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_package.py dist/quarto_review-0.3.0-py3-none-any.whl
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/build_demo.py --output dist/release-demo
 ~~~
 
@@ -43,7 +83,7 @@ Only successful main builds can deploy the guide; pull requests have read-only r
 The guide displays its package version and links to build-info.json containing the commit, whether the working tree was modified, and an input hash.
 A local uncommitted build is labelled as such and must not be presented as an exact published release.
 
-## Current-format native Word check
+## Historical 0.2.1 native Word check
 
 The checked runtime is commit 58f5062892b26409d1518d3bdaad1bfbd15e0efa, version 0.2.1, using Word for Mac 16.113.2 (16.113.26092012) on macOS 26.5.2.
 Subsequent release changes only document the results, pin installation examples and add the synthetic input fixture.

@@ -79,6 +79,61 @@ print('PASS: isolated installed wheel renders HTML and Word with native review r
         subprocess.run(
             [str(python), "-I", "-c", script], cwd=project, env=env, check=True
         )
+        # Exercise the new citation filters and cleanup from the installed wheel,
+        # rather than allowing the checkout to supply missing packaged assets.
+        citations = directory / "citations"
+        citations.mkdir()
+        fixture = ROOT / "tests/fixtures/native-word-citations.qmd"
+        for name in ("index.qmd", "reference.qmd"):
+            shutil.copyfile(fixture, citations / name)
+        bibliography = ROOT / "tests/fixtures/native-word-citations.bib"
+        shutil.copyfile(bibliography, citations / bibliography.name)
+        command = binary / ("quarto-review.exe" if os.name == "nt" else "quarto-review")
+        for arguments in (
+            ["accept", "s1"],
+            ["reject", "s2"],
+            ["reply", "c2", "--body", "The second reference is correct."],
+            ["resolve", "c2"],
+            ["compact", "--dry-run"],
+            ["compact"],
+            ["enable"],
+        ):
+            subprocess.run(
+                [str(command), *arguments], cwd=citations, env=env, check=True
+            )
+        for target in ("html", "docx"):
+            subprocess.run(
+                ["quarto", "render", "index.qmd", "--to", target, "--quiet"],
+                cwd=citations,
+                env=env,
+                check=True,
+            )
+        script = """
+from pathlib import Path
+from quarto_review.project import Project
+from quarto_review.word.package import WordPackage
+from quarto_review.word.reader import read_review, visible_text
+from quarto_review.word.validation import validate_package
+project = Project.read(Path('.'))
+assert not project.metadata.suggestions
+assert project.ordinary_changes()['index.qmd'].automatic_ids == ()
+assert '@smith2021' in project.source.text and '@smith2022' not in project.source.text
+package = WordPackage.read('index.docx')
+validate_package(package)
+review = read_review(package)
+assert not review.revisions
+thread = next(c for c in review.comments if c.text == 'Please check the second reference.')
+assert thread.resolved and [a.text for a in thread.anchors] == ['Smith 2021']
+assert any(c.text == 'The second reference is correct.' and c.parent_id == thread.id for c in review.comments)
+assert any(c.text == 'Keep this reviewed reference entry.' and [a.text for a in c.anchors] == ['A reviewed reference entry'] for c in review.comments)
+assert 'a modest effect' in visible_text(package.xml('word/document.xml'))
+assert Path('index.html').is_file()
+print('PASS: installed wheel preserves citation targets, replies and reviewed entries through cleanup')
+"""
+        subprocess.run(
+            [str(python), "-I", "-c", script], cwd=citations, env=env, check=True
+        )
+        assert (citations / bibliography.name).read_bytes() == bibliography.read_bytes()
 
 
 if __name__ == "__main__":

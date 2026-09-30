@@ -8,10 +8,12 @@ All study details and reviewer names are fictional.
 
 - index.qmd is the editable manuscript, including suggestions and discussions.
 - reference.qmd is its frozen comparison reference for this review round.
-- _quarto.yml selects the manuscript layout and HTML/Word formats.
+- _quarto.yml selects the manuscript layout, bibliography and HTML/Word formats.
+- references.bib contains fictional records used by the citation example.
 
 Keep the reference frozen while trying ordinary edits, replies and decisions.
 The working document intentionally differs from it in the practice-session sentence.
+The guide also demonstrates a citation-member comment, a pending citation addition and explicit cleanup of settled prose decisions.
 
 ## Run locally
 
@@ -20,7 +22,7 @@ Install Quarto and Python 3.12 or later, then run these commands in this directo
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.2.1
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.0
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~

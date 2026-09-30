@@ -25,7 +25,13 @@ from quarto_review.word.validation import validate_package
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/walkthrough"
-SOURCE_FILES = ("index.qmd", "reference.qmd", "_quarto.yml", "README.md")
+SOURCE_FILES = (
+    "index.qmd",
+    "reference.qmd",
+    "_quarto.yml",
+    "README.md",
+    "references.bib",
+)
 
 
 def verify(directory: Path, project: Project) -> None:
@@ -73,11 +79,23 @@ def verify(directory: Path, project: Project) -> None:
     assert sum(c.parent_id is not None for c in review.comments) == 4, (
         "Word replies missing"
     )
+    citation = next(
+        c
+        for c in review.comments
+        if c.text.startswith("Please check that the second reference")
+    )
+    assert [anchor.text for anchor in citation.anchors] == ["Smith 2021"], (
+        "Citation member target changed"
+    )
+    addition = page.get_element_by_id("qr-suggestion-s6").text_content()
+    assert "2022" in addition and "@smith" not in addition, (
+        "Citation addition is not formatted"
+    )
     assert any(c.resolved for c in review.comments), "Resolved thread missing"
     assert {r.kind for r in review.revisions} >= {"ins", "del"}, (
         "Tracked changes missing"
     )
-    assert set(project.metadata.suggestions) == {"s1", "s2", "s3", "s4", "s5"}
+    assert set(project.metadata.suggestions) == {"s1", "s2", "s3", "s4", "s5", "s6"}
     assert project.ordinary_changes()["index.qmd"].automatic_ids, (
         "Ordinary edit missing"
     )
