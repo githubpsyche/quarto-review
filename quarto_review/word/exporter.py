@@ -722,7 +722,7 @@ def finish_document(
 
 
 def _coalesce_revisions(root: etree._Element) -> None:
-    """Combine adjacent fragments of one revision after run-level conversion."""
+    """Join one suggestion across runs and wholly revised citation links."""
     text_revisions = {
         tag("w", name) for name in ("ins", "del", "moveFrom", "moveTo")
     } | {tag("w14", "conflictIns"), tag("w14", "conflictDel")}
@@ -739,3 +739,45 @@ def _coalesce_revisions(root: etree._Element) -> None:
                 parent.remove(node)
             else:
                 previous = node
+        _lift_citation_revision(parent)
+
+
+def _lift_citation_revision(link: etree._Element) -> None:
+    """Represent a wholly revised citation link inside its text revision.
+
+    Word permits hyperlink fields made of runs inside an insertion or deletion,
+    but not a ``w:hyperlink`` element. Using a field for this one case allows the
+    adjacent separator to join the same revision without extending the link's
+    visible range. Partial links and links with other attributes stay untouched.
+    """
+    anchor = link.get(tag("w", "anchor"), "")
+    if (
+        link.tag != tag("w", "hyperlink")
+        or not anchor.startswith(("ref-", "ref_"))
+        or set(link.attrib) != {tag("w", "anchor")}
+        or '"' in anchor
+        or len(link) != 1
+        or link[0].tag not in {tag("w", "ins"), tag("w", "del")}
+    ):
+        return
+    revision = link[0]
+    instruction = "delInstrText" if revision.tag == tag("w", "del") else "instrText"
+
+    def field_run(kind: str, text: str | None = None) -> etree._Element:
+        run = etree.Element(tag("w", "r"))
+        node = etree.SubElement(run, tag("w", instruction if text else "fldChar"))
+        if text is None:
+            node.set(tag("w", "fldCharType"), kind)
+        else:
+            node.set(tag("xml", "space"), "preserve")
+            node.text = text
+        return run
+
+    children = list(revision)
+    replacement = etree.Element(revision.tag, revision.attrib)
+    replacement.append(field_run("begin"))
+    replacement.append(field_run("", f' HYPERLINK \\l "{anchor}" '))
+    replacement.append(field_run("separate"))
+    replacement.extend(children)
+    replacement.append(field_run("end"))
+    link.getparent().replace(link, replacement)

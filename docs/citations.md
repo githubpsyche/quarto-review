@@ -1,6 +1,6 @@
 # Native citations and review
 
-This guide describes native citation support in version 0.3.0. See [release evidence](release.md) for automated checks and the completed Word for Mac cycle.
+This guide describes native citation support in version 0.3.1. See [release evidence](release.md) for automated checks and the completed Word for Mac cycle.
 
 ## The author’s workflow
 
@@ -99,7 +99,11 @@ Review cards use the formatted passage, so the cards do not introduce extra cita
 Historical citation alternatives no longer present as pending manuscript ranges are explicitly labelled as source syntax.
 Comment and reply bodies continue to use basic CommonMark; citations within discussions are not processed.
 
-Word can split one citation suggestion into separate tracked fragments at hyperlink boundaries, such as the separator and added year. Accept or reject every fragment belonging to that suggestion before reconciling its QMD decision. The version 0.3.0 application check rejected both fragments and retained the adjacent member comment, reply and resolution.
+New exports in version 0.3.1 keep a contiguous insertion or deletion containing complete citation links together as one Word text revision. Place the cursor in the change and accept or reject it once; the separator and citation label are decided together, while the link still covers only the citation label. Selecting just part of the text can still apply a partial decision, as with other Word revisions.
+
+This grouping preserves citation targets, attribution and comment ranges. It applies to complete reference links; a link containing both unchanged and revised text, or additional native link attributes, keeps its existing boundaries. Imported hyperlink fields remain recoverable reference links, subject to the same citation-normalization limits described above.
+
+Earlier version 0.3.0 can split one citation suggestion into separate tracked fragments at hyperlink boundaries, such as the separator and added year. For documents exported by that version, accept or reject every fragment before reconciling the QMD decision. Its application check rejected both fragments and retained the adjacent member comment, reply and resolution.
 
 For internal group ranges, citation links must remain available.
 The installed late filter enables them when necessary; an explicit `link-citations: false` is incompatible and produces an error.

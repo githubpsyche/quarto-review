@@ -61,7 +61,7 @@ Download and unzip the [editable example](downloads/walkthrough.zip), then run t
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.0
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.1
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~
@@ -245,7 +245,7 @@ Evidence [@brown2020; []{#c7-start}@smith2021[]{#c7-end}{++; @smith2022++}{#s6 b
 Evidence [@brown2020; []{#c7-start}@smith2021[]{#c7-end}{++; @smith2022++}{#s6 by=R at=2026-09-01T09:40:00Z}] supports the account.
 
 The comment stays attached to Smith (2021), and the pending addition uses the same formatted citation as the manuscript.
-Word can split a citation addition into tracked fragments for its separator and year; decide all its fragments when reviewing that change.
+In Word, this complete citation addition is one tracked change, including its separator. Place the cursor in the addition and accept or reject the current change once.
 After importing Word feedback with an explicit bibliography, review the recovery report for retained cases.
 The [citation guide](https://github.com/githubpsyche/quarto-review/blob/main/docs/citations.md) explains bibliography-assisted import and normalization, reviewed source reference lists, and ambiguous ranges that require whole-group comments.
 

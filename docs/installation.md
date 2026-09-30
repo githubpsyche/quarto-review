@@ -2,12 +2,12 @@
 
 The package requires Python 3.12 or later and Quarto; development and CI use Quarto 1.8.27.
 Node is used only for browser tests, not for manuscript editing or rendering.
-The instructions below select version 0.3.0; its validation scope is recorded in [release evidence](release.md).
+The instructions below select version 0.3.1; its validation scope is recorded in [release evidence](release.md).
 
 ## Install a chosen checkout
 
 ~~~sh
-git clone --branch v0.3.0 https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.3.1 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
 python -m venv .venv-user
 source .venv-user/bin/activate
@@ -16,7 +16,7 @@ python -m pip install .
 
 On Windows use `.venv-user\Scripts\Activate.ps1` in PowerShell.
 Record `git rev-parse HEAD` with the installed version; an unpinned default branch can change.
-For a built wheel, install its actual filename with `python -m pip install /path/to/quarto_review-0.3.0-py3-none-any.whl`.
+For a built wheel, install its actual filename with `python -m pip install /path/to/quarto_review-0.3.1-py3-none-any.whl`.
 Do not use a development editable installation for a manuscript that must stay on a fixed runtime.
 
 In the manuscript directory, `quarto-review init --author "Your Name"` initializes an existing plain index.qmd.

@@ -62,12 +62,13 @@ Read the [source-format guide](docs/single-source.md) for overlapping ranges, re
 
 ## Install and start
 
-Version 0.3.0 adds native citation review and cleanup of settled prose suggestions, checked together in an explicitly reconciled Word for Mac cycle.
+Version 0.3.1 includes native citation review and cleanup of settled prose suggestions, and keeps complete pending citation edits together in Word.
+The citation grouping check extends the completed explicit Word review cycle from 0.3.0.
 See the [release evidence](docs/release.md) for the tested workflow and limits.
 Install Python 3.12 or later, Git and Quarto (tested with 1.8.27), then install the selected source checkout:
 
 ~~~sh
-git clone --branch v0.3.0 https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.3.1 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
 python -m venv .venv-user
 source .venv-user/bin/activate
@@ -75,7 +76,7 @@ python -m pip install .
 ~~~
 
 On Windows, activate with `.venv-user\Scripts\Activate.ps1` in PowerShell.
-The command above selects the v0.3.0 tag; use a different verified tag explicitly when upgrading.
+The command above selects the v0.3.1 tag; use a different verified tag explicitly when upgrading.
 Keep the environment in place while its manuscript projects use it.
 See [installation, upgrades and removal](docs/installation.md) for project-local changes and moving a project.
 
@@ -111,7 +112,8 @@ See the [source and HTML guide](docs/single-source.md#comments-and-ranges) for s
 
 ## Native citations
 
-Citation support is included in `v0.3.0`, selected by the installation example above.
+Citation support is included in `v0.3.1`, selected by the installation example above.
+Complete citation additions and deletions are exported together with their separators as one Word text revision.
 
 Keep citations as ordinary `[@key]` and `@key` source, with reference data in the project’s bibliography.
 Word import can recover explicit reference links when supplied with `--bibliography references.bib`.
@@ -198,7 +200,7 @@ This preserves native attribution and source identities.
 Returned Word feedback is reviewed against an explicitly selected prior version; schema 2 does not silently merge it into an active manuscript.
 The older automatic receive workflow remains specific to schema 1.
 Follow the [worked review round](docs/review-round.md) to retain the version sent, examine a returned candidate and apply explicit decisions without replacing newer local work.
-That example includes a reproducible scripted check; the separate [Word application check](docs/release.md#current-format-native-word-check) also passed for 0.3.0, including citations and cleanup.
+That example includes a reproducible scripted check; the separate [Word application checks](docs/release.md#current-format-native-word-check) cover the complete 0.3.0 cycle with citations and cleanup and the focused 0.3.1 citation grouping check.
 
 Convert a schema-1 project and its frozen reference into a separate candidate:
 

@@ -19,6 +19,7 @@ from quarto_review import __version__
 from quarto_review.markup import Comment, walk
 from quarto_review.project import Project
 from quarto_review.quarto import enable
+from quarto_review.word.identity import read_identity
 from quarto_review.word.package import WordPackage
 from quarto_review.word.reader import read_review
 from quarto_review.word.validation import validate_package
@@ -91,6 +92,15 @@ def verify(directory: Path, project: Project) -> None:
     assert "2022" in addition and "@smith" not in addition, (
         "Citation addition is not formatted"
     )
+    member_ids = {
+        item["word_id"]
+        for item in read_identity(word)["revisions"]
+        if item["id"] == "s6"
+    }
+    assert len(member_ids) == 1, "Word split the citation addition"
+    assert [(r.kind, r.text) for r in review.revisions if r.id in member_ids] == [
+        ("ins", ", 2022")
+    ], "Word citation addition changed"
     assert any(c.resolved for c in review.comments), "Resolved thread missing"
     assert {r.kind for r in review.revisions} >= {"ins", "del"}, (
         "Tracked changes missing"
