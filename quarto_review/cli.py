@@ -35,6 +35,22 @@ def _parser() -> argparse.ArgumentParser:
     imported.add_argument("--into", type=Path, required=True)
     imported.add_argument("--author", required=True)
     imported.add_argument("--legacy", action="store_true")
+    imported.add_argument(
+        "--bibliography",
+        type=Path,
+        help="Recover explicit citation links using this bibliography.",
+    )
+    citations = commands.add_parser(
+        "normalize-citations",
+        help="Recover native Quarto citation syntax without changing review decisions.",
+    )
+    citations.add_argument("--project", type=Path, default=Path.cwd())
+    citations.add_argument("--bibliography", type=Path, required=True)
+    citations.add_argument(
+        "--apply",
+        action="store_true",
+        help="Update source and reference; otherwise report a dry run.",
+    )
     source = commands.add_parser(
         "parse", help="Read CriticMarkup without changing a source file."
     )
@@ -320,6 +336,18 @@ def main(argv: list[str] | None = None) -> int:
                 for record in [*result["comments"], *result["revisions"]]:
                     record.pop("xml", None)
             print(json.dumps(result, ensure_ascii=False, indent=2))
+        elif arguments.command == "normalize-citations":
+            from quarto_review.citations import normalize_project
+
+            print(
+                json.dumps(
+                    normalize_project(
+                        arguments.project, arguments.bibliography, apply=arguments.apply
+                    ),
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
         elif arguments.command == "import-docx":
             from quarto_review.word.importer import import_document
 
@@ -328,11 +356,24 @@ def main(argv: list[str] | None = None) -> int:
                 arguments.into,
                 author=arguments.author,
                 single_source=not arguments.legacy,
+                bibliography=arguments.bibliography,
             )
             print(
                 json.dumps(
                     {
                         "project": str(arguments.into.resolve()),
+                        **(
+                            {
+                                "citations": json.loads(
+                                    (
+                                        arguments.into
+                                        / ".quarto/review/citation-import.json"
+                                    ).read_text()
+                                )
+                            }
+                            if arguments.bibliography
+                            else {}
+                        ),
                         "comments": len(metadata.comments),
                         "replies": sum(
                             len(item.replies) for item in metadata.comments.values()

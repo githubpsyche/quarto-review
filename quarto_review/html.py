@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from html import escape
 
 from quarto_review.discussion import render_messages
@@ -103,9 +104,16 @@ def review_panel(prepared: PreparedRender) -> str:
             pieces.append(f'<time datetime="{escape(item.date, quote=True)}">Suggested {escape(item.date)}</time>')
         for side, label, text in (("before", "Removed", before), ("after", "Added", after)):
             if text:
+                body = bodies[f"change:{identifier}:{side}"]
+                if item.status == "pending" and re.search(r"(?<![\w])@[-\w]+", text):
+                    # The finisher takes citation wording from this manuscript's
+                    # formatted range, retaining its style and disambiguation.
+                    body = body.replace('<div class="qr-body">', '<div class="qr-body" data-qr-rendered-preview="true">', 1)
+                if item.status != "pending" and re.search(r"(?<![\w])@[-\w]+", text):
+                    body = '<p class="qr-source-preview">Source syntax: this historical alternative has no formatted review range.</p>' + body
                 pieces.append(
                     f'<section class="qr-change-{side}"><h3>{label}</h3>'
-                    + bodies[f"change:{identifier}:{side}"]
+                    + body
                     + "</section>"
                 )
         if not before and not after:

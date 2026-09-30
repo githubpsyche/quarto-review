@@ -58,6 +58,12 @@ def enable(directory: Path) -> None:
             entry,
             *[item for item in filters if item != "quarto-review"],
         ]
+    citation_filter = {
+        "at": "post-quarto",
+        "path": "_extensions/quarto-review/citations.lua",
+    }
+    if citation_filter not in config.get("filters", []):
+        config["filters"].append(citation_filter)
     review_settings = config.setdefault("quarto-review", {})
     if not isinstance(review_settings, dict):
         raise ReviewError("The quarto-review project setting must be a YAML mapping")
@@ -291,13 +297,17 @@ def prepare(
             ]
         },
     }
-    if format == "docx":
+    if format in {"docx", "html"}:
         identifier = sha256((source_name + "\0" + output).encode()).hexdigest()
+        record["citation_plan"] = f".quarto/review/plans/{identifier}.citations"
+        # Direct preparation/export has no Lua pass. Quarto replaces this empty
+        # plan with its parsed citation ranges; every prepare clears stale data.
+        write_text(project.directory / record["citation_plan"], "[]\n")
         write_text(
             project.directory / ".quarto/review/plans" / f"{identifier}.json",
             json.dumps(record, ensure_ascii=False, indent=2) + "\n",
         )
-    elif format == "html":
+    if format == "html":
         from quarto_review.html import review_panel
 
         record["panel"] = review_panel(prepared)
@@ -307,7 +317,7 @@ def prepare(
 def finish_outputs(
     directory: Path, outputs: tuple[str, ...] | None = None
 ) -> list[str]:
-    """Finish only Word files produced by this render, with repeat-call protection."""
+    """Finish review information in this render's Word and HTML outputs."""
     directory = directory.resolve()
     if outputs is None:
         paths = os.environ.get("QUARTO_PROJECT_OUTPUT_FILES")
@@ -325,10 +335,10 @@ def finish_outputs(
     )
     finished = []
     for path in files:
-        if path.suffix.lower() != ".docx":
+        if path.suffix.lower() not in {".docx", ".html"}:
             continue
         if not path.is_relative_to(directory):
-            raise ReviewError(f"Word output is outside the project: {path}")
+            raise ReviewError(f"Review output is outside the project: {path}")
         candidates = [
             (record_path, record)
             for record_path, record in records
@@ -347,13 +357,40 @@ def finish_outputs(
                 raise ReviewError(
                     f"{name} changed during rendering; render again before exporting review records"
                 )
+        try:
+            citation_plans = (
+                json.loads((directory / record["citation_plan"]).read_text())
+                if record.get("citation_plan")
+                else []
+            )
+        except (OSError, json.JSONDecodeError) as error:
+            raise ReviewError(
+                f"Cannot read the generated citation plan for {path.name}; render again"
+            ) from error
+        if path.suffix.lower() == ".html":
+            from quarto_review.citation_ranges import restore_html
+            from quarto_review.html_finish import finish_html
+
+            completed_html = finish_html(
+                restore_html(path.read_text(), citation_plans), record["expected"]
+            )
+            write_text(path, completed_html)
+            record["finished_hash"] = sha256(path.read_bytes()).hexdigest()
+            write_text(
+                record_path, json.dumps(record, ensure_ascii=False, indent=2) + "\n"
+            )
+            finished.append(str(path))
+            continue
         prepared = PreparedRender(
             record["markdown"],
             ReviewMetadata.from_mapping(record["metadata"]),
             record["comments"],
             Counter(record["expected"]),
         )
-        completed = finish_document(WordPackage.read(path), prepared, directory)
+        from quarto_review.citation_ranges import restore_word
+
+        package = restore_word(WordPackage.read(path), citation_plans)
+        completed = finish_document(package, prepared, directory)
         if os.environ.get("QUARTO_REVIEW_CAPTURE") != "1" and not record.get(
             "single_source"
         ):

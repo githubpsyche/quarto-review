@@ -1,5 +1,6 @@
 -- Review preparation uses the executed Markdown, before Quarto normalizes its AST.
 local readqmd = require("readqmd")
+local citation_boundaries = dofile(pandoc.path.directory(PANDOC_SCRIPT_FILE) .. "/citation-boundaries.lua")
 
 local function read_file(path)
   local stream, reason = io.open(path, "r")
@@ -131,13 +132,26 @@ function Pandoc(doc)
     if extension ~= "smart" then table.insert(extensions, extension) end
   end
   options.extensions = extensions
-  local parsed = readqmd.readqmd(payload.markdown, options)
+  local parsed = readqmd.readqmd(citation_boundaries.protect(payload.markdown), options)
   timing("parsed Markdown")
   doc.blocks = parsed.blocks
   timing("assigned blocks")
   for key, value in pairs(parsed.meta) do doc.meta[key] = value end
+  local citation_plans, deferred
+  doc, citation_plans, deferred = citation_boundaries.prepare(doc)
+  if payload.citation_plan then
+    local file, reason = io.open(directory .. "/" .. payload.citation_plan, "w")
+    if not file then error("Cannot save citation boundary plan: " .. reason) end
+    file:write(quarto.json.encode(citation_plans))
+    file:close()
+  end
   if format == "html" then
-    doc = html_boundaries(doc, payload.expected)
+    local immediate = {}
+    for token, count in pairs(payload.expected) do
+      local remaining = count - (deferred[token] or 0)
+      if remaining > 0 then immediate[token] = remaining end
+    end
+    doc = html_boundaries(doc, immediate)
     doc.blocks:insert(pandoc.RawBlock("html", payload.panel))
     quarto.doc.add_html_dependency({name = "quarto-review", version = "0.2.0", scripts = {"review.js"}, stylesheets = {"review.css"}})
   end

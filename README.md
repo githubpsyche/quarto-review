@@ -109,6 +109,14 @@ Discussion and before/after cards remain inspectable after decisions.
 The preview is read-only: edit and make decisions in the QMD or with the commands below.
 See the [source and HTML guide](docs/single-source.md#comments-and-ranges) for syntax, filters and output limits.
 
+## Native citations
+
+Keep citations as ordinary `[@key]` and `@key` source, with reference data in the project’s bibliography.
+Word import can recover explicit reference links when supplied with `--bibliography references.bib`.
+Existing schema-2 imports have a dry-run `normalize-citations` command that converts both source and reference without accepting wording changes.
+After conversion, edit citations by hand and render normally; no command is needed for each edit.
+See the [citation guide](docs/citations.md) for import limits, reviewed reference lists and preservation of comments within citation groups.
+
 ## Edit and discuss
 
 Comment status and change status answer different questions.

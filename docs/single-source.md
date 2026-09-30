@@ -75,6 +75,14 @@ The delete-comment command removes the definition, its replies and their markers
 It preserves the selected text and other annotations.
 Deleted discussions remain absent from subsequent outputs, even when they exist in the frozen reference.
 
+## Citations
+
+Native Quarto citations remain ordinary manuscript source.
+The render pipeline preserves supported review ranges around or within citation groups and takes pending citation-card previews from the formatted manuscript.
+Use whole citations or groups for ordinary edits; do not split citation keys with CriticMarkup.
+The [citation guide](citations.md) explains one-time recovery from imported reference links, reference-list preservation and unsupported boundary cases.
+This does not extend citation processing to discussion bodies.
+
 ## Suggestions and decisions
 
 Empty navigation anchors such as `[]{#ref-example .anchor}` are document structure, so adding, removing or renaming them does not create an automatic wording suggestion.

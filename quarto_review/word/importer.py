@@ -415,7 +415,12 @@ def restore_source(markdown: str, prepared: ImportedSource) -> str:
 
 
 def import_document(
-    source: Path, destination: Path, *, author: str, single_source: bool = False
+    source: Path,
+    destination: Path,
+    *,
+    author: str,
+    single_source: bool = False,
+    bibliography: Path | None = None,
 ) -> ReviewMetadata:
     """Create a new source project while preserving the original Word file.
 
@@ -423,6 +428,15 @@ def import_document(
     directory and is published only after every review boundary is accounted for.
     """
     source, destination = source.resolve(), destination.resolve()
+    if bibliography is not None and not single_source:
+        raise ReviewError(
+            "Citation recovery requires single-source import; omit --legacy"
+        )
+    if bibliography is not None:
+        bibliography = bibliography.resolve()
+        from quarto_review.citations import bibliography_keys
+
+        citation_keys = bibliography_keys(bibliography)
     if destination.exists():
         raise ReviewError(f"Import destination already exists: {destination}")
     package = WordPackage.read(source)
@@ -461,6 +475,47 @@ def import_document(
             qmd = convert_verified(parse(qmd, "index.qmd"), prepared.metadata)
         else:
             prepared.metadata.write(project / "review.yml")
+        if bibliography is not None:
+            import json
+
+            import yaml
+
+            from quarto_review.citations import normalize_source
+            from quarto_review.source import frontmatter, read
+
+            normalized = normalize_source(read(qmd), citation_keys)
+            qmd = normalized.text
+            front, body_start = frontmatter(qmd)
+            front["bibliography"] = bibliography.name
+            qmd = (
+                "---\n"
+                + yaml.safe_dump(front, sort_keys=False, allow_unicode=True)
+                + "---\n"
+                + qmd[body_start:]
+            )
+            shutil.copyfile(bibliography, project / bibliography.name)
+            report = normalized.report()
+            fields = []
+            for story in package.stories():
+                root = package.xml(story)
+                instructions = " ".join(
+                    root.xpath(
+                        ".//w:instrText/text() | .//w:fldSimple/@w:instr", namespaces=NS
+                    )
+                )
+                if re.search(
+                    r"CITATION|CSL_CITATION|ZOTERO_ITEM|EN\.CITE", instructions, re.I
+                ):
+                    fields.append(
+                        {
+                            "story": story,
+                            "reason": "Citation-manager fields require explicit recovery; this pass recovers reference links only. The original Word file is archived.",
+                        }
+                    )
+            report["native_fields"] = fields
+            location = project / ".quarto/review/citation-import.json"
+            location.parent.mkdir(parents=True, exist_ok=True)
+            location.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
         (project / "index.qmd").write_text(qmd, encoding="utf-8")
         archived = project / archive
         archived.parent.mkdir(parents=True, exist_ok=True)

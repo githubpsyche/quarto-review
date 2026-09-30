@@ -105,6 +105,18 @@ attribution remain conflicts. An unchanged Word save imported with no changes;
 the reviewed return imported both decisions, the new reply, and the resolved
 thread. A repeated import added nothing, and the frozen reference stayed intact.
 
+## Native citation development
+
+The development checkout includes bibliography-assisted recovery of explicit author/year reference links during schema-2 Word import and a dry-run normalization command for existing schema-2 projects.
+Normalization converts source and reference together, preserves unrelated edits and reports ambiguous or protected text.
+HTML and Word fixture tests verify comment targets, replies, attribution, pending additions, ordinary narrative edits and unchanged citation formatting under author–date and numeric CSL styles.
+Other tests cover reviewed source bibliographies, duplicated image-caption handling in HTML, safe nested review-card previews and refusal of ambiguous formatted ranges.
+
+These changes are not deployed automatically into pinned manuscript runtimes.
+Reference-manager fields and unlinked plain-text citations are not recovered.
+Collapsed/reordered citation identities, repeated keys and annotations inside narrative components can require whole-group ranges.
+See [native citations](citations.md) for the supported workflow and full limits.
+
 ## Explicit limits
 
 References below to returned-file conflict detection describe the schema-1 reconciliation engine.

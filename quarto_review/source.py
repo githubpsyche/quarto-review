@@ -600,6 +600,10 @@ class _Reader(_Parser):
             cursor += 1
         if depth:
             return None
+        # A citation/link immediately followed by CriticMarkup is not a span.
+        # Let the ordinary parser consume the review operation separately.
+        if self.source.startswith(("{++", "{--", "{~~", "{==", "{>>"), cursor):
+            return None
         attr = _ATTR.match(self.source, cursor)
         if not attr:
             return None
