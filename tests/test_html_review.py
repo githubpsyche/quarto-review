@@ -38,7 +38,8 @@ def test_change_cards_keep_alternatives_and_decisions_separate_from_prose():
     assert "Rejected insertion" in rejected.text_content()
     assert "an unnecessary qualification" in rejected.text_content()
     assert panel.xpath('//*[@id="qr-kind"]/option/@value') == ["", "comment", "suggestion"]
-    assert panel.xpath('//*[@id="qr-status"]/option/@value') == ["open-pending", "resolved-decided", ""]
+    assert panel.xpath('//*[@id="qr-kind"]/option[@selected]/@value') == ["comment"]
+    assert panel.xpath('//*[@id="qr-status"]/option/@value') == ["open", "resolved", ""]
 
 
 @pytest.mark.integration

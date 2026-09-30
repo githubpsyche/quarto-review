@@ -5,7 +5,7 @@
 The single-source format is implemented with compact spans, crossing ranges, author aliases, Markdown thread blocks and inline suggestion decisions.
 Tests cover source-only operations, deletion without removing prose, concurrent-write rejection, comment movement without prose changes, loss-checked candidate conversion, native Word import, HTML/Word output and executed references.
 The full non-private regression suite also exercises the existing converter and schema-1 compatibility.
-The checked version is 0.3.1; package, Python module and Quarto extension version declarations agree.
+The checked version is 0.3.2; package, Python module and Quarto extension version declarations agree.
 Focused checks also verify that opting an imported message into Markdown survives later review operations.
 The reproducible checks and recorded results are in [release checks](release.md).
 The 0.3.0 schema-2 application cycle with citations and cleanup passed in Word for Mac 16.113.3 on 30 September 2026: accept a prose replacement, reject both fragments of an added citation, reply to and resolve two threads, save, import into a separate candidate, explicitly reconcile while retaining a newer local edit, compact settled prose, export, reopen, save and import again.
@@ -125,6 +125,12 @@ These changes are not deployed automatically into pinned manuscript runtimes.
 Reference-manager fields and unlinked plain-text citations are not recovered.
 Collapsed/reordered citation identities, repeated keys and annotations inside narrative components can require whole-group ranges.
 See [native citations](citations.md) for the supported workflow and full limits.
+
+## Comments default and Word return guide in 0.3.2
+
+HTML review starts with Comments and status Open, while Changes and the combined view remain available. The default, filters, navigation and restoration passed all six synthetic browser groups; the focused HTML review suite passed 22 tests.
+The public guide and editable download now introduce the complete explicit Word return workflow before the feature examples, including a reviewed wording decision, reply transfer and a retained newer local edit. The guide build checked HTML, Word review records and downloads.
+The Word import and export implementation is unchanged from 0.3.1; its native Word evidence is retained rather than repeating the application cycle. Native application checks cover Word for Mac 16.113.3, not Windows or Word for the web.
 
 ## Citation revision grouping in 0.3.1
 

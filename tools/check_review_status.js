@@ -15,9 +15,10 @@ async (page) => {
   };
   await page.reload();
   await page.locator('#qr-author-hint').waitFor();
-  check(await page.locator('#qr-kind').inputValue() === '', 'Default review omits a type');
-  check(await page.locator('#qr-status').inputValue() === 'open-pending', 'Default status is not open/pending');
-  check(await matches() === 'c2,s1', 'Default matches include decided records');
+  check(await page.locator('#qr-kind').inputValue() === 'comment', 'Default review is not Comments');
+  check(await page.locator('#qr-status').inputValue() === 'open', 'Default comment status is not Open');
+  check(await matches() === 'c2', 'Default matches are not limited to open comments');
+  await count('1 comment');
   const before = await records();
   const options = {
     '': [['open-pending','Open comments + pending changes'], ['resolved-decided','Resolved comments + decided changes'], ['','All statuses']],
@@ -108,5 +109,5 @@ async (page) => {
   }
   check(!errors.length, errors.join('; '));
   if (failures.length) throw new Error(failures.join('\n'));
-  return 'PASS: combined defaults, type-specific menus, corresponding state translations, all-status retention, individual decisions, resolved-thread pending changes, counts, navigation, author filters, restoration and unchanged source records at 1600px and 600px.';
+  return 'PASS: comment defaults, type-specific menus, corresponding state translations, all-status retention, individual decisions, resolved-thread pending changes, counts, navigation, author filters, restoration and unchanged source records at 1600px and 600px.';
 }

@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const kind = controls.querySelector("#qr-kind");
   // Own the defaults and options here too, for HTML from older pinned renderers.
   // These combined states are filters only; source decisions remain independent.
-  kind.value = "";
+  kind.value = "comment";
   const statusOptions = {
     "": [["open-pending", "Open comments + pending changes"],
       ["resolved-decided", "Resolved comments + decided changes"], ["", "All statuses"]],
@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     status.value = next;
     statusKind = kind.value;
   }
-  updateStatusOptions("open-pending");
+  updateStatusOptions("open");
   const authorHint = document.createElement("p");
   authorHint.id = "qr-author-hint";
   authorHint.className = "qr-author-hint";

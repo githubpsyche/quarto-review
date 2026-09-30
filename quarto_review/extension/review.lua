@@ -153,7 +153,7 @@ function Pandoc(doc)
     end
     doc = html_boundaries(doc, immediate)
     doc.blocks:insert(pandoc.RawBlock("html", payload.panel))
-    quarto.doc.add_html_dependency({name = "quarto-review", version = "0.3.1", scripts = {"review.js"}, stylesheets = {"review.css"}})
+    quarto.doc.add_html_dependency({name = "quarto-review", version = "0.3.2", scripts = {"review.js"}, stylesheets = {"review.css"}})
   end
   timing("complete")
   return doc

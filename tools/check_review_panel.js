@@ -53,9 +53,10 @@ async (page) => {
   await page.locator('#qr-kind').waitFor();
   await page.waitForFunction(() => document.body.dataset.reviewComments === 'margin');
   await checkVisibility([['#qr-toggle-comments', '#qr-hide-controls'], ['#qr-hide-controls', '#qr-hide-comments']]);
-  assert(await page.locator('#qr-kind').inputValue() === '', 'Default review omits changes');
-  assert(await page.locator('#qr-status').inputValue() === 'open-pending', 'Default status includes decided records');
-  await checkCount('2 comments, 2 changes');
+  assert(await page.locator('#qr-kind').inputValue() === 'comment', 'Default review is not Comments');
+  assert(await page.locator('#qr-status').inputValue() === 'open', 'Default comment status is not Open');
+  await checkCount('2 comments');
+  await select('Review', '');
   await select('Status', '');
   await checkCount('3 comments, 8 changes');
   await select('Review', 'comment');

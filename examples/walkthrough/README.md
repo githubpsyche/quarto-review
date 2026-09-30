@@ -22,7 +22,7 @@ Install Quarto and Python 3.12 or later, then run these commands in this directo
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.1
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.2
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~
@@ -38,4 +38,23 @@ quarto render index.qmd --to docx
 ~~~
 
 Read index.qmd alongside its HTML preview for source examples, review commands and current output limits.
+
+## When Word feedback returns
+
+Retain the exact Word draft sent and its matching project inputs.
+Import the return into a separate directory:
+
+~~~sh
+quarto-review import-docx returned.docx --into ../feedback-candidate --author "Your Name"
+quarto-review feedback --project ../feedback-candidate
+~~~
+
+Compare the candidate with the version sent and your current index.qmd.
+Apply reviewed wording decisions in the working project and transfer new replies and thread states with their original attribution and native records.
+Keep any newer local edits; importing the return does not merge it into your working source.
+Validate, inspect HTML and render the next Word draft after reconciliation.
+The opening review-round example in index.qmd and the [full procedure](https://github.com/githubpsyche/quarto-review/blob/main/docs/review-round.md) explain these steps.
+
+Native application checks currently cover Word for Mac 16.113.3; Windows and Word for the web have not been checked.
+
 For development, use the repository's tools/build_demo.py to build a disposable copy and validate both outputs without modifying these source files.

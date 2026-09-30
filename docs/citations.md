@@ -1,6 +1,6 @@
 # Native citations and review
 
-This guide describes native citation support in version 0.3.1. See [release evidence](release.md) for automated checks and the completed Word for Mac cycle.
+This guide describes native citation support in version 0.3.2. See [release evidence](release.md) for automated checks and the completed Word for Mac cycle.
 
 ## The author’s workflow
 

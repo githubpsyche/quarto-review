@@ -116,7 +116,7 @@ Previous and Next move within the list while this view is active.
 Go to passage switches to At passage and navigates to the anchor.
 Returning to List restores expanded entries and its independent scroll position.
 Hiding the review cards or entering Reading view hides the list as well.
-Review defaults to Comments and changes; Status defaults to Open comments + pending changes.
+Review defaults to Comments; Status defaults to Open.
 The count includes only the selected review types and counts matches across the document, not just cards currently visible beside the text.
 Status options depend on Review: Open, Resolved or All statuses for comments; Pending, Accepted or rejected, Accepted, Rejected or All statuses for changes.
 With both types selected, Status offers Open comments + pending changes, Resolved comments + decided changes, and All statuses.

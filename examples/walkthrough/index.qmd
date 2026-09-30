@@ -25,6 +25,54 @@ This guide is itself a review document.
 Each example pairs the source you edit with a result rendered by the extension.
 All study details and reviewer names are fictional.
 
+## A Word review round {#review-round}
+
+Once your project is [enabled locally](#work-locally), you can write in Quarto while a collaborator reviews Word.
+Here is a small example of how you incorporate the return.
+Your source proposes a wording change with the ID s1:
+
+~~~markdown
+The study found [a {~~large~>modest~~}{#s1 by=A} effect]{#c1}.
+The follow-up was brief.
+~~~
+
+1. **Send an identified draft.** Validate the source and render Word:
+
+   ~~~sh
+   quarto-review validate
+   quarto render index.qmd --to docx
+   ~~~
+
+   Retain that exact Word file and its matching QMD, reference, configuration and assets, for example in a Git commit plus the exported file.
+   Leave the review-round reference frozen; it may be older than the version you sent.
+
+2. **Continue writing while the reviewer works in Word.** The reviewer accepts “large” → “modest”, replies to the comment and resolves it.
+   Meanwhile, you change the follow-up sentence locally to “The follow-up lasted two days.”
+
+3. **Inspect the return separately.** Import the saved Word return into a new candidate directory and list its feedback:
+
+   ~~~sh
+   quarto-review import-docx returned.docx --into ../feedback-candidate --author "Your Name"
+   quarto-review feedback --project ../feedback-candidate
+   ~~~
+
+   Import leaves your working source unchanged.
+   Compare the candidate with the exact version sent and your current QMD: the returned “modest” records the accepted suggestion, while its unchanged “brief” sentence should not overwrite your newer two-day edit.
+
+4. **Apply the reviewed differences to your working project.** After matching the wording change to the original s1, accept it there:
+
+   ~~~sh
+   quarto-review accept s1
+   ~~~
+
+   Transfer the new reviewer reply and resolved thread state into the working QMD, preserving the author's name, date, reply relationships and imported native records and Word archives.
+   This transfer currently requires source-level review; the [worked review round](https://github.com/githubpsyche/quarto-review/blob/main/docs/review-round.md#apply-only-the-reviewed-differences) gives the full procedure.
+   Retain your two-day sentence, validate, inspect the HTML preview and render the next Word draft.
+
+Native application checks currently cover **Word for Mac 16.113.3**.
+Windows and Word for the web have not been checked.
+The [release evidence](https://github.com/githubpsyche/quarto-review/blob/main/docs/release.md) distinguishes native Word checks from scripted examples.
+
 ## The files you work with
 
 A review project keeps the usual Quarto manuscript structure:
@@ -61,7 +109,7 @@ Download and unzip the [editable example](downloads/walkthrough.zip), then run t
 ~~~sh
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.1
+python -m pip install git+https://github.com/githubpsyche/quarto-review.git@v0.3.2
 quarto-review enable
 quarto preview index.qmd --to html
 ~~~
@@ -329,7 +377,7 @@ quarto render index.qmd --to html
 ~~~
 
 In HTML, **Redline**, **Original** and **Proposed** compare pending wording.
-Review initially shows open comments and pending changes. Select Changes to focus on suggestions, then filter their status to Pending, Accepted or Rejected.
+Review initially shows open comments. Select Changes to inspect suggestions, then filter their status to Pending, Accepted or Rejected.
 Change cards show removed and added wording alongside the author and decision.
 Previous and Next move through matching records, including accepted deletions and rejected insertions that leave no text in the manuscript.
 A Δ marker locates each change while changes are selected.
@@ -363,7 +411,7 @@ quarto render index.qmd --to docx
 The [example Word draft](index.docx) contains native comments, replies and pending tracked changes generated from the same working source as this page.
 HTML views and filters do not change what is exported.
 The review list can show all matching comments and changes without moving the document.
-Review defaults to comments and changes, with open comments and pending changes selected; changing review type selects the corresponding available status.
+Review defaults to Comments with status Open; changing review type selects the corresponding available status.
 
 Freeze a new reference only when you deliberately begin a new review round:
 

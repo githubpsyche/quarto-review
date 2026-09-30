@@ -13,6 +13,17 @@ The current single-source format is schema 2.
 It replaces the separately maintained review.yml used by schema 1.
 Existing schema-1 projects remain supported; migration is explicit and creates candidates rather than switching a project.
 
+## A Word review round
+
+1. Edit your QMD, inspect the HTML preview and export Word. Retain the exact draft sent and its matching source, reference, configuration and assets.
+2. Import the returned Word file into a separate candidate directory. Compare it with both the version sent and your current working source.
+3. Apply the reviewed wording decisions to the working source. Transfer new replies and thread states with their original attribution and native records, retaining local edits made since export. This reconciliation is an explicit source-level step.
+4. Validate, inspect HTML and export the next Word draft. Keep the reference frozen until you deliberately begin another review round.
+
+The [short public walkthrough](https://githubpsyche.github.io/quarto-review/#review-round) shows an accepted wording change, a returned reply and a newer local edit.
+The [worked review round](docs/review-round.md) gives the commands and record-transfer procedure.
+Native application checks currently cover Word for Mac 16.113.3; Windows and Word for the web have not been checked.
+
 ## Files you maintain
 
 | File | Responsibility |
@@ -62,13 +73,13 @@ Read the [source-format guide](docs/single-source.md) for overlapping ranges, re
 
 ## Install and start
 
-Version 0.3.1 includes native citation review and cleanup of settled prose suggestions, and keeps complete pending citation edits together in Word.
-The citation grouping check extends the completed explicit Word review cycle from 0.3.0.
+Version 0.3.2 starts HTML review on Comments with status Open and introduces the Word return workflow near the start of the guide.
+It includes native citation review, grouped Word citation changes and cleanup of settled prose suggestions from 0.3.1.
 See the [release evidence](docs/release.md) for the tested workflow and limits.
 Install Python 3.12 or later, Git and Quarto (tested with 1.8.27), then install the selected source checkout:
 
 ~~~sh
-git clone --branch v0.3.1 https://github.com/githubpsyche/quarto-review.git
+git clone --branch v0.3.2 https://github.com/githubpsyche/quarto-review.git
 cd quarto-review
 python -m venv .venv-user
 source .venv-user/bin/activate
@@ -76,7 +87,7 @@ python -m pip install .
 ~~~
 
 On Windows, activate with `.venv-user\Scripts\Activate.ps1` in PowerShell.
-The command above selects the v0.3.1 tag; use a different verified tag explicitly when upgrading.
+The command above selects the v0.3.2 tag; use a different verified tag explicitly when upgrading.
 Keep the environment in place while its manuscript projects use it.
 See [installation, upgrades and removal](docs/installation.md) for project-local changes and moving a project.
 
@@ -105,14 +116,14 @@ quarto render index.qmd --to docx
 Choose the manuscript style through the project's normal Quarto format settings, including installed APAQuarto formats.
 The extension provides review controls rather than replacing manuscript layout.
 HTML provides original, proposed and redline views, an independent review list, comments beside their passages, author filters and a clean reading view.
-The default shows open comments and pending changes.
+The review panel defaults to open comments.
 Discussion and before/after cards remain inspectable after decisions.
 The preview is read-only: edit and make decisions in the QMD or with the commands below.
 See the [source and HTML guide](docs/single-source.md#comments-and-ranges) for syntax, filters and output limits.
 
 ## Native citations
 
-Citation support is included in `v0.3.1`, selected by the installation example above.
+Citation support is included in `v0.3.2`, selected by the installation example above.
 Complete citation additions and deletions are exported together with their separators as one Word text revision.
 
 Keep citations as ordinary `[@key]` and `@key` source, with reference data in the project’s bibliography.

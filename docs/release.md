@@ -1,10 +1,17 @@
 # Release checks and evidence
 
-This page records the checks for version 0.3.1 and preserves the earlier 0.3.0 and 0.2.1 evidence below.
+This page records the checks for version 0.3.2 and preserves the earlier 0.3.1, 0.3.0 and 0.2.1 evidence below.
 Run these checks on the exact checkout that will be tagged.
 Do not treat earlier schema-1 Word checks as evidence for a completed schema-2 application cycle.
 
-## Version 0.3.1 evidence
+## Version 0.3.2 evidence
+
+This patch changes the HTML review default to Comments with status Open and brings the explicit Word return workflow into the public introduction. Installation instructions and editable examples select v0.3.2.
+The implementation passed 22 focused HTML review tests and all six synthetic browser groups, including switching review types, status filters, navigation, author filtering and restoration. The updated guide build checked HTML, Word review records and editable downloads.
+The full release CI results and exact tagged build identity are recorded in the release assets. CI checks the independently installed wheel and deploys the guide only after its tests pass.
+Word import and export code is unchanged from 0.3.1. The existing Word for Mac application evidence below is retained; this patch does not introduce a new native Word cycle or automatic return reconciliation.
+
+## Historical 0.3.1 evidence
 
 This patch keeps a complete citation addition or deletion together with its separators as one Word text revision, preserving citation targets, attribution and comment ranges. Partial links and links with additional native attributes retain their existing structure.
 The grouping implementation passed 252 public Python tests on macOS, with four optional checks skipped and four private tests deselected. The skips require three installed-APAQuarto checks and Jupyter execution.
@@ -81,7 +88,7 @@ npx --no-install playwright install chromium
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/run_browser_checks.py
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_review_round.py --output work/release-round
 UV_PROJECT_ENVIRONMENT=.venv-dev uv build --wheel
-UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_package.py dist/quarto_review-0.3.1-py3-none-any.whl
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_package.py dist/quarto_review-0.3.2-py3-none-any.whl
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/build_demo.py --output dist/release-demo
 ~~~
 
