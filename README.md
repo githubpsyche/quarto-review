@@ -111,6 +111,8 @@ See the [source and HTML guide](docs/single-source.md#comments-and-ranges) for s
 
 ## Native citations
 
+Citation support requires a checkout newer than `v0.2.1`; the installation example above is pinned to that release.
+
 Keep citations as ordinary `[@key]` and `@key` source, with reference data in the project’s bibliography.
 Word import can recover explicit reference links when supplied with `--bibliography references.bib`.
 Existing schema-2 imports have a dry-run `normalize-citations` command that converts both source and reference without accepting wording changes.

@@ -1,5 +1,7 @@
 # Native citations and review
 
+This guide describes citation support in the development checkout, newer than the tagged `v0.2.1` release.
+
 ## The author’s workflow
 
 Use ordinary Quarto citations such as `[@smith2020; @brown2021]` and `@smith2020` in the manuscript.
