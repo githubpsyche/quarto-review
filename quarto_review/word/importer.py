@@ -297,6 +297,8 @@ def prepare_import(
                 children = list(node)
                 for child in node.iter(tag("w", "delText")):
                     child.tag = tag("w", "t")
+                for child in node.iter(tag("w", "delInstrText")):
+                    child.tag = tag("w", "instrText")
                 parent.remove(node)
                 start_mark = _run(boundary(kind, identifier, "S"))
                 end_mark = _run(boundary(kind, identifier, "E"))

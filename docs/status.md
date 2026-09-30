@@ -126,6 +126,12 @@ Reference-manager fields and unlinked plain-text citations are not recovered.
 Collapsed/reordered citation identities, repeated keys and annotations inside narrative components can require whole-group ranges.
 See [native citations](citations.md) for the supported workflow and full limits.
 
+## Citation revision grouping in the development checkout
+
+Complete citation links inside one contiguous prose insertion or deletion are exported together with their separators as one text revision. A focused Word for Mac 16.113.3 check on 30 September 2026 confirmed that a normal save retained the grouping and that a single current-change acceptance or rejection decided the whole addition. The citation link and adjacent comment were preserved; the pending, accepted and rejected documents were each independently imported.
+
+Automated checks also cover deletions, author-date and numeric citations, replacements containing multiple links, attribution, replies, resolution, source identity and re-export. Partial links and links with additional attributes retain their existing structure. This change is not included in the published 0.3.0 assets.
+
 ## Explicit limits
 
 References below to returned-file conflict detection describe the schema-1 reconciliation engine.

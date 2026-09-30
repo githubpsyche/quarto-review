@@ -13,6 +13,7 @@ from quarto_review.html_finish import finish_html
 from quarto_review.markers import marker
 from quarto_review.project import capture_reference, setup
 from quarto_review.quarto import enable, finish_outputs
+from quarto_review.word.identity import read_identity
 from quarto_review.word.package import WordPackage
 from quarto_review.word.reader import read_review, visible_text
 
@@ -94,6 +95,16 @@ A {~~claim [@brown2020]~>stronger claim [@smith2021]~~}{#s2}.
     assert next(c for c in review.comments if c.parent_id).parent_id == thread.id
     additions = [v for v in review.revisions if v.kind == "ins"]
     assert any(("3" if numeric else "2022") in v.text for v in additions)
+    mapping = read_identity(package)["revisions"]
+    member_ids = {item["word_id"] for item in mapping if item["id"] == "s1"}
+    member_changes = [v for v in additions if v.id in member_ids]
+    assert len(member_changes) == 1
+    assert member_changes[0].text == ("; 3" if numeric else ", 2022")
+    for identifier, kind in (("s2", "ins"), ("s2", "del")):
+        assert (
+            sum(item["id"] == identifier and item["kind"] == kind for item in mapping)
+            == 1
+        )
     assert all(v.author == "Example Author" for v in additions)
     assert "QRX" not in visible_text(package.xml("word/document.xml"))
     assert (tmp_path / "index.qmd").read_bytes() == frozen

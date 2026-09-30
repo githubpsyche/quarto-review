@@ -19,7 +19,7 @@ from quarto_review.metadata import (
     SuggestionMetadata,
 )
 from quarto_review.rendering import prepare_render
-from quarto_review.word.exporter import finish_document
+from quarto_review.word.exporter import _coalesce_revisions, finish_document
 from quarto_review.word.identity import read_identity
 from quarto_review.word.importer import import_document
 from quarto_review.word.namespaces import NS, tag
@@ -80,6 +80,120 @@ def test_native_replacement_comment_and_reply(tmp_path):
     with pytest.raises(ReviewError, match="Comment 1 is missing"):
         validate_package(output)
     assert b"QRX" not in output.parts["word/document.xml"]
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("kind", ["ins", "del"])
+def test_citation_separator_and_link_share_one_revision_and_reimport(tmp_path, kind):
+    contents = ", [{==2022==}{>>Check this year.<<}{#c1}](#ref-smith2022)"
+    change = "{++" + contents + "++}" if kind == "ins" else "{--" + contents + "--}"
+    source = (
+        "Evidence (Smith 2021"
+        + change
+        + "{#s1}).\n\n[]{#ref-smith2022}\n\nSmith (2022).\n"
+    )
+    metadata = ReviewMetadata("Writer", "2026-01-01T00:00:00Z")
+    metadata.suggestions["s1"] = SuggestionMetadata("Writer", metadata.created_at)
+    metadata.comments["c1"] = CommentMetadata(
+        "Reviewer",
+        metadata.created_at,
+        status="resolved",
+        replies=(Reply("c2", "Checked.", "Writer", metadata.created_at, "c1"),),
+    )
+    prepared = prepare_render(parse(source), metadata)
+    output = finish_document(
+        converted(prepared, tmp_path / "marked.docx"), prepared, tmp_path
+    )
+    root = output.xml("word/document.xml")
+    review = read_review(output)
+    assert [(r.kind, r.text, r.author, r.date) for r in review.revisions] == [
+        (kind, ", 2022", "Writer", metadata.created_at)
+    ]
+    assert [item["id"] for item in read_identity(output)["revisions"]] == ["s1"]
+    assert root.xpath(".//w:fldChar/@w:fldCharType", namespaces=NS) == [
+        "begin",
+        "separate",
+        "end",
+    ]
+    instruction = "instrText" if kind == "ins" else "delInstrText"
+    assert root.xpath(f".//w:{instruction}/text()", namespaces=NS) == [
+        ' HYPERLINK \\l "ref-smith2022" '
+    ]
+    before = "Evidence (Smith 2021" + (", 2022" if kind == "del" else "") + ")."
+    after = "Evidence (Smith 2021" + (", 2022" if kind == "ins" else "") + ")."
+    assert visible_text(root, "original").splitlines()[0] == before
+    assert visible_text(root, "proposed").splitlines()[0] == after
+    assert [c.text for c in review.comments] == ["Check this year.", "Checked."]
+    assert all(c.resolved and c.anchors[0].text == "2022" for c in review.comments)
+    assert review.comments[1].parent_id == review.comments[0].id
+    returned = tmp_path / "returned.docx"
+    output.write(returned)
+    incoming = import_document(returned, tmp_path / "candidate", author="Writer")
+    restored = (tmp_path / "candidate/index.qmd").read_text()
+    assert "#ref-smith2022" in restored and "2022" in restored
+    assert len(incoming.suggestions) == 1
+    assert next(iter(incoming.suggestions.values())).provenance["kind"] == kind
+    repeated = prepare_render(parse(restored), incoming)
+    reexported = finish_document(
+        converted(repeated, tmp_path / "reexport.docx"),
+        repeated,
+        tmp_path / "candidate",
+    )
+    assert [(r.kind, r.text) for r in read_review(reexported).revisions] == [
+        (kind, ", 2022")
+    ]
+    assert visible_text(
+        reexported.xml("word/document.xml"), "original"
+    ) == visible_text(root, "original")
+    assert visible_text(
+        reexported.xml("word/document.xml"), "proposed"
+    ) == visible_text(root, "proposed")
+
+
+@pytest.mark.parametrize("boundary", ["partial", "tooltip", "other-link", "other-id"])
+def test_citation_grouping_preserves_other_link_content_and_revision_boundaries(
+    boundary,
+):
+    paragraph = etree.Element(tag("w", "p"))
+    attrs = {tag("w", "id"): "1", tag("w", "author"): "Writer"}
+    separator = etree.SubElement(paragraph, tag("w", "ins"), attrs)
+    etree.SubElement(
+        etree.SubElement(separator, tag("w", "r")), tag("w", "t")
+    ).text = ", "
+    link = etree.SubElement(
+        paragraph, tag("w", "hyperlink"), {tag("w", "anchor"): "ref-smith2022"}
+    )
+    if boundary == "partial":
+        etree.SubElement(
+            etree.SubElement(link, tag("w", "r")), tag("w", "t")
+        ).text = "Smith "
+    elif boundary == "tooltip":
+        link.set(tag("w", "tooltip"), "Keep this description")
+    elif boundary == "other-link":
+        link.set(tag("w", "anchor"), "section-two")
+    inserted = etree.SubElement(link, tag("w", "ins"), attrs)
+    if boundary == "other-id":
+        inserted.set(tag("w", "id"), "2")
+    etree.SubElement(
+        etree.SubElement(inserted, tag("w", "r")), tag("w", "t")
+    ).text = "2022"
+    original, proposed = (
+        visible_text(paragraph, "original"),
+        visible_text(paragraph, "proposed"),
+    )
+    _coalesce_revisions(paragraph)
+    assert visible_text(paragraph, "original") == original
+    assert visible_text(paragraph, "proposed") == proposed
+    if boundary == "other-id":
+        assert [
+            (node.get(tag("w", "id")), visible_text(node)) for node in paragraph
+        ] == [("1", ", "), ("2", "2022")]
+    else:
+        assert link.getparent() is paragraph
+        assert not paragraph.xpath(".//w:fldChar", namespaces=NS)
+        assert link.find("./w:ins/w:r/w:t", NS).text == "2022"
+        if boundary == "tooltip":
+            assert link.get(tag("w", "tooltip")) == "Keep this description"
 
 
 @pytest.mark.integration
@@ -357,15 +471,22 @@ def test_navigation_anchor_edits_preserve_word_review(
     metadata = ReviewMetadata("Writer", "2026-01-01T00:00:00Z")
     metadata.suggestions["s1"] = SuggestionMetadata("Reviewer", metadata.created_at)
     metadata.comments["c1"] = CommentMetadata(
-        "Reviewer", metadata.created_at, status="resolved",
+        "Reviewer",
+        metadata.created_at,
+        status="resolved",
         replies=(Reply("r1", "Done.", "Writer", metadata.created_at, "c1"),),
     )
-    prose = "A {=={~~old~>better~~}{#s1} claim==}{>>Explain.<<}{#c1}.\n\nA strong result.\n"
+    prose = (
+        "A {=={~~old~>better~~}{#s1} claim==}{>>Explain.<<}{#c1}.\n\nA strong result.\n"
+    )
     before = parse(before_anchor + prose)
     after = parse(after_anchor + prose.replace("strong", "modest"))
     result = compare(
-        after, before, metadata,
-        reference_id="test-round", date="2026-01-02T00:00:00Z",
+        after,
+        before,
+        metadata,
+        reference_id="test-round",
+        date="2026-01-02T00:00:00Z",
     )
     prepared = prepare_render(result.document, result.metadata)
     output = finish_document(
@@ -381,8 +502,10 @@ def test_navigation_anchor_edits_preserve_word_review(
     assert "previous" not in bookmarks
     review = read_review(output)
     assert [(r.kind, r.text, r.author) for r in review.revisions] == [
-        ("del", "old", "Reviewer"), ("ins", "better", "Reviewer"),
-        ("del", "strong", "Writer"), ("ins", "modest", "Writer"),
+        ("del", "old", "Reviewer"),
+        ("ins", "better", "Reviewer"),
+        ("del", "strong", "Writer"),
+        ("ins", "modest", "Writer"),
     ]
     assert [c.text for c in review.comments] == ["Explain.", "Done."]
     assert review.comments[0].resolved
