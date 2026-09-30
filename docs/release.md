@@ -1,19 +1,20 @@
 # Release checks and evidence
 
-This page records the checks for version 0.3.0 and preserves the earlier 0.2.1 evidence below.
+This page records the checks for version 0.3.1 and preserves the earlier 0.3.0 and 0.2.1 evidence below.
 Run these checks on the exact checkout that will be tagged.
 Do not treat earlier schema-1 Word checks as evidence for a completed schema-2 application cycle.
 
-## Version 0.3.0 evidence
+## Version 0.3.1 evidence
 
-The release includes native citation review and explicit cleanup of settled prose suggestions.
-The isolated macOS release checkout passed 246 public Python tests, with four optional checks skipped and four private tests deselected. The skips require three installed-APAQuarto checks and Jupyter execution.
-Lint and all six synthetic browser groups passed, as did the explicit review round, an independent installed-wheel check rendering HTML and Word with citations and cleanup, and the updated guide build.
-The live-preview check now handles Quarto project and file preview separately: project preview renders on its reload request; file preview waits for the finished HTML before requesting it.
-The Word application check passed on 30 September 2026 using Word for Mac 16.113.3 (16.113.26092714), macOS 26.5.2 (25F84), Python 3.12.13 and Quarto 1.8.27.
-Its library input SHA-256 was `3074af18395a2585f99bca89050447a6242f1c3220a0fde5d39af9e659fcaad7`.
-The final Word-written file had SHA-256 `db0954c42796c524d03419c5c3e061dbea04641123e57ff598efae746cc775ff`.
-This fingerprint identifies package source, including its bundled extension; later documentation and test additions do not change that runtime.
+This patch keeps a complete citation addition or deletion together with its separators as one Word text revision, preserving citation targets, attribution and comment ranges. Partial links and links with additional native attributes retain their existing structure.
+The grouping implementation passed 252 public Python tests on macOS, with four optional checks skipped and four private tests deselected. The skips require three installed-APAQuarto checks and Jupyter execution.
+The follow-up package check installs the 0.3.1 wheel independently, verifies the pending citation is one revision, then verifies citation targets, replies and reviewed entries through cleanup. The guide build verifies the same grouped addition in its downloadable Word file.
+
+The focused application check passed on 30 September 2026 using Word for Mac 16.113.3 (16.113.26092714). One current-change acceptance or rejection decided the entire addition, and saving a pending change through Word retained its grouping. Each pending, accepted and rejected native file was independently imported; the citation link and adjacent comment remained intact.
+The native-check library SHA-256 was `68680c0127173fd21da529ac6f08f83aed338bd9be2560f83fef3746dd47ebef`. The 0.3.1 library SHA-256 is `e06245935ea78d3ae8ed684fc98c852d68eac399f142c3e0e7ffc248fcc35d03`; the package files differ only in the three version declarations. This equivalence was verified before building the release, so the application check was retained rather than repeating the unchanged cycle.
+The pending native file had SHA-256 `157d5c354a86cd613a0a2135951762dc5e6f99ea359f11866f1019205853114a`, the accepted file `3290835ed9dee6bae011878956da22a65f0546fd8de64c7bda558c3f1cc98fa7`, and the rejected file `f80931317ca5d213e705297d4c6ee0effb91e526fe47cd7069cd9466ebb1a41c`.
+Raw native files remain in ignored local evidence; release downloads contain checksums and a validation summary.
+The complete explicit return and cleanup cycle from 0.3.0 remains the evidence for the unchanged parts of that workflow. This patch does not add automatic schema-2 return reconciliation.
 
 ## Current-format native Word check
 
@@ -26,7 +27,7 @@ UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_native_citations.py p
 ~~~
 
 1. Open sent.docx in Word. Confirm no repair warning, a readable manuscript and comments, and pending prose and citation changes.
-2. Accept large → modest. Reject the added Smith (2022) citation, including its separate separator and year fragments. Reply to the magnitude thread with “The revised magnitude addresses my concern.” and to the second-reference thread with “The second reference is correct.” Resolve both; leave the reviewed-reference-entry thread open. Save returned-native.docx in the test directory.
+2. Accept large → modest. Place the cursor in the added Smith (2022) citation and reject the current change once, including its separator. In an older 0.3.0 export, reject both fragments. Reply to the magnitude thread with “The revised magnitude addresses my concern.” and to the second-reference thread with “The second reference is correct.” Resolve both; leave the reviewed-reference-entry thread open. Save returned-native.docx in the test directory.
 3. Run the reconcile phase below. It imports a separate candidate, explicitly applies those decisions and discussions, retains the newer local two-day edit, and checks that compacting s0, s1 and s2 preserves the rendered readings, native revision wording and attribution, and complete discussion records. The original Word archive and bibliography remain unchanged.
 4. Open reconciled.docx in Word, inspect its citation, comments and remaining local tracked changes, and save reopened-native.docx. Run verify to import it independently and check those records again.
 
@@ -38,11 +39,22 @@ UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_native_citations.py v
 Both candidate imports left the working source, reference and bibliography unchanged.
 Cleanup updated settled decisions in both QMD files while retaining the newer local wording as pending changes.
 The member comment stayed on Smith (2021), and the reviewed source bibliography entry retained its independent comment.
-Word split the added citation into two tracked fragments; both had to be rejected.
+In the completed 0.3.0 cycle, the added citation had two tracked fragments and both were rejected. The focused 0.3.1 check verifies that the same addition is now a single revision.
 On the second save, Word renumbered native review IDs and rounded revision timestamps to minutes. Verification matched complete comment records uniquely and checked their parent relationships under that mapping, along with ordered revision wording and attribution.
 Ordinary prose edits receive render-time revision dates; fixed message timestamps remained unchanged.
 Raw native files and user-profile attribution stay in ignored local test output, not the published download.
 Windows, Word for the web and arbitrary native formatting or embedded objects are outside this application check.
+
+## Historical 0.3.0 evidence
+
+The release includes native citation review and explicit cleanup of settled prose suggestions.
+The isolated macOS release checkout passed 246 public Python tests, with four optional checks skipped and four private tests deselected. The skips require three installed-APAQuarto checks and Jupyter execution.
+Lint and all six synthetic browser groups passed, as did the explicit review round, an independent installed-wheel check rendering HTML and Word with citations and cleanup, and the updated guide build.
+The live-preview check now handles Quarto project and file preview separately: project preview renders on its reload request; file preview waits for the finished HTML before requesting it.
+The Word application check passed on 30 September 2026 using Word for Mac 16.113.3 (16.113.26092714), macOS 26.5.2 (25F84), Python 3.12.13 and Quarto 1.8.27.
+Its library input SHA-256 was `3074af18395a2585f99bca89050447a6242f1c3220a0fde5d39af9e659fcaad7`.
+The final Word-written file had SHA-256 `db0954c42796c524d03419c5c3e061dbea04641123e57ff598efae746cc775ff`.
+This fingerprint identifies package source, including its bundled extension; later documentation and test additions do not change that runtime.
 
 ## Historical 0.2.1 evidence
 
@@ -69,7 +81,7 @@ npx --no-install playwright install chromium
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/run_browser_checks.py
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_review_round.py --output work/release-round
 UV_PROJECT_ENVIRONMENT=.venv-dev uv build --wheel
-UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_package.py dist/quarto_review-0.3.0-py3-none-any.whl
+UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/check_package.py dist/quarto_review-0.3.1-py3-none-any.whl
 UV_PROJECT_ENVIRONMENT=.venv-dev uv run python tools/build_demo.py --output dist/release-demo
 ~~~
 

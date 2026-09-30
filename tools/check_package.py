@@ -89,6 +89,31 @@ print('PASS: isolated installed wheel renders HTML and Word with native review r
         bibliography = ROOT / "tests/fixtures/native-word-citations.bib"
         shutil.copyfile(bibliography, citations / bibliography.name)
         command = binary / ("quarto-review.exe" if os.name == "nt" else "quarto-review")
+        subprocess.run([str(command), "enable"], cwd=citations, env=env, check=True)
+        subprocess.run(
+            ["quarto", "render", "index.qmd", "--to", "docx", "--quiet"],
+            cwd=citations,
+            env=env,
+            check=True,
+        )
+        script = """
+from quarto_review.word.identity import read_identity
+from quarto_review.word.package import WordPackage
+from quarto_review.word.reader import read_review
+from quarto_review.word.validation import validate_package
+package = WordPackage.read('index.docx')
+validate_package(package)
+review = read_review(package)
+ids = {item['word_id'] for item in read_identity(package)['revisions'] if item['id'] == 's2'}
+assert len(ids) == 1
+assert [(r.kind, r.text, r.author) for r in review.revisions if r.id in ids] == [('ins', ', 2022', 'Example Author')]
+thread = next(c for c in review.comments if c.text == 'Please check the second reference.')
+assert [a.text for a in thread.anchors] == ['Smith 2021']
+print('PASS: installed wheel groups the citation separator and linked year into one revision')
+"""
+        subprocess.run(
+            [str(python), "-I", "-c", script], cwd=citations, env=env, check=True
+        )
         for arguments in (
             ["accept", "s1"],
             ["reject", "s2"],

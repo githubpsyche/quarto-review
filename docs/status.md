@@ -5,10 +5,10 @@
 The single-source format is implemented with compact spans, crossing ranges, author aliases, Markdown thread blocks and inline suggestion decisions.
 Tests cover source-only operations, deletion without removing prose, concurrent-write rejection, comment movement without prose changes, loss-checked candidate conversion, native Word import, HTML/Word output and executed references.
 The full non-private regression suite also exercises the existing converter and schema-1 compatibility.
-The checked version is 0.3.0; package, Python module and Quarto extension version declarations agree.
+The checked version is 0.3.1; package, Python module and Quarto extension version declarations agree.
 Focused checks also verify that opting an imported message into Markdown survives later review operations.
 The reproducible checks and recorded results are in [release checks](release.md).
-A schema-2 application cycle with citations and cleanup passed in Word for Mac 16.113.3 on 30 September 2026: accept a prose replacement, reject both fragments of an added citation, reply to and resolve two threads, save, import into a separate candidate, explicitly reconcile while retaining a newer local edit, compact settled prose, export, reopen, save and import again.
+The 0.3.0 schema-2 application cycle with citations and cleanup passed in Word for Mac 16.113.3 on 30 September 2026: accept a prose replacement, reject both fragments of an added citation, reply to and resolve two threads, save, import into a separate candidate, explicitly reconcile while retaining a newer local edit, compact settled prose, export, reopen, save and import again.
 This validates the documented explicit workflow on that Word version; it does not establish automatic schema-2 reconciliation or every Word feature.
 
 | Current schema-2 capability | Evidence and boundary |
@@ -126,11 +126,11 @@ Reference-manager fields and unlinked plain-text citations are not recovered.
 Collapsed/reordered citation identities, repeated keys and annotations inside narrative components can require whole-group ranges.
 See [native citations](citations.md) for the supported workflow and full limits.
 
-## Citation revision grouping in the development checkout
+## Citation revision grouping in 0.3.1
 
 Complete citation links inside one contiguous prose insertion or deletion are exported together with their separators as one text revision. A focused Word for Mac 16.113.3 check on 30 September 2026 confirmed that a normal save retained the grouping and that a single current-change acceptance or rejection decided the whole addition. The citation link and adjacent comment were preserved; the pending, accepted and rejected documents were each independently imported.
 
-Automated checks also cover deletions, author-date and numeric citations, replacements containing multiple links, attribution, replies, resolution, source identity and re-export. Partial links and links with additional attributes retain their existing structure. This change is not included in the published 0.3.0 assets.
+Automated checks also cover deletions, author-date and numeric citations, replacements containing multiple links, attribution, replies, resolution, source identity and re-export. Partial links and links with additional attributes retain their existing structure. Version 0.3.1 adds this grouping to the citation and cleanup support checked for 0.3.0.
 
 ## Explicit limits
 
