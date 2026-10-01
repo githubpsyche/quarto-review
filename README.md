@@ -1,8 +1,8 @@
 # Quarto review
 
 **Write and revise your manuscript in Quarto while collaborators review Word drafts with native comments and tracked changes.**
-Quarto review brings supported Word feedback into editable QMD, keeps discussions attached to the text, and exports Word drafts with native review information.
-Work in your preferred editor or with a coding assistant, inspect an HTML preview, and render Word when you are ready to share.
+Quarto review brings supported Word feedback into an editable Quarto Markdown (`.qmd`) source file, keeps discussions attached to the text, and exports Word drafts with native review information.
+Work in your preferred editor or with a [coding assistant](#work-with-an-llm-agent-and-a-live-preview), inspect an HTML preview, and render Word when you are ready to share.
 
 [Try the live guide](https://githubpsyche.github.io/quarto-review/) · [Download the editable example](https://githubpsyche.github.io/quarto-review/downloads/walkthrough.zip)
 
@@ -16,7 +16,7 @@ Its suggested replacement is stored directly in QMD:
 ~~~
 
 Comments and replies live in the same file, with their authors and decisions.
-Ordinary prose edits need no markup: they are compared with a frozen reference.
+Ordinary prose edits need no markup: they are compared with a frozen copy of the source saved for the current review round (`reference.qmd`).
 The HTML preview is read-only; make edits, replies and decisions in the source or with the review commands.
 
 ## Try a complete example
@@ -88,7 +88,20 @@ quarto render index.qmd --to docx
 
 Initialization adds review settings, enables the extension and freezes a reference.
 The review author identifies new feedback and does not replace the manuscript's author field.
-For an existing annotated source or an imported Word candidate, use `quarto-review enable` instead.
+For an existing annotated source, use `quarto-review enable` instead.
+
+For a manuscript currently in Word, run the following in the directory containing the draft to create a separate candidate project:
+
+~~~sh
+quarto-review import-docx draft.docx --into ../draft-candidate --author "Your Name"
+cd ../draft-candidate
+quarto-review enable
+quarto-review validate
+quarto render index.qmd --to html
+~~~
+
+Inspect the imported text and review information in `index.qmd` and the HTML preview before adopting the candidate. See [conversion limits](docs/status.md#explicit-limits) for supported content and layout differences.
+
 Your normal Quarto format settings, including installed APAQuarto formats, determine the manuscript layout.
 
 | File | Purpose |
@@ -100,6 +113,29 @@ Your normal Quarto format settings, including installed APAQuarto formats, deter
 Keep citations as ordinary `[@key]` and `@key` source with reference data in your bibliography.
 The [citation guide](docs/citations.md) covers recovery of supported references from Word and review of citation edits.
 The current format is schema 2; the older QMD plus `review.yml` format remains supported, with [explicit candidate migration](docs/development-isolation.md#upgrades-and-migrations).
+
+## Work with an LLM agent and a live preview
+
+The project grew out of the difficulty of using LLM agents to revise Word drafts with comments and tracked changes.
+Operating Word through its interface can be slow, while editing DOCX directly requires preserving the relationships between text, comments and revisions.
+Quarto review lets the agent work on readable source while you inspect and discuss the rendered manuscript in HTML.
+
+After [setting up a project](#try-a-complete-example), have the agent keep a Quarto preview running in its directory:
+
+~~~sh
+quarto preview index.qmd --to html
+~~~
+
+1. Locate a passage or comment in HTML and tell the agent what to address. Comment IDs such as `c1` connect your request to the same discussion in the source. For example: “Address c1 with more cautious wording. Preserve the other feedback and leave my revision pending for collaborators.”
+
+2. The agent reads the surrounding text, replies and existing suggestions, then drafts both revised wording and how to track it for collaborators. Ordinary edits are compared with the reference; use explicit suggestions when grouping or attribution matters. It edits QMD and runs `quarto-review validate`. Ask it to preserve existing attribution and unrelated feedback.
+
+3. Quarto refreshes the preview after saves. Inspect both the wording and the extent of the tracked changes in Original, Proposed or Redline, discuss it with the agent, and repeat as needed.
+
+4. Ask the agent to record your response and any wording decisions or comment resolutions in the source. These records appear in the preview and the next Word export. Leave revisions pending when collaborators still need to review them, even if the associated comment is resolved.
+
+Take turns editing the source while keeping the preview available.
+When ready to share, render Word and follow the [Word review round](#a-word-review-round) when collaborators' feedback returns.
 
 ## Documentation and help
 
