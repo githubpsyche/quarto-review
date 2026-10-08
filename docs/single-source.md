@@ -96,6 +96,19 @@ The replication was {++independent ++}{#s2 by=A}.
 ~~~
 
 Pending is implicit.
+To propose splitting a paragraph, replace its separating space with a blank line:
+
+~~~markdown
+The first point ends here.{~~ ~>
+
+~~}{#s3 by=A}The next point starts here.
+~~~
+
+Word exports this as a deleted space and an inserted paragraph mark under the same suggestion identity and author.
+The reverse replacement joins two paragraphs with a space.
+Accepting or rejecting the change therefore preserves the corresponding paragraph structure, as well as the words.
+Standalone paragraph-break insertions and deletions are supported between ordinary paragraphs; this does not define tracked section, page, table or heading changes.
+
 Add .accepted or .rejected to a suggestion's attributes to record its disposition.
 Removing either class returns it to pending.
 Both wording alternatives remain available until an explicit cleanup.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from copy import deepcopy
 from dataclasses import replace
@@ -90,6 +91,61 @@ def _split_runs(root: etree._Element) -> Counter[str]:
         for offset, atom in enumerate(atoms):
             parent.insert(position + offset, atom)
     return found
+
+
+def _paragraph_break_ranges(root: etree._Element, prepared: PreparedRender) -> None:
+    """Attach standalone break markers to the paragraphs they separate.
+
+    Pandoc emits two marker-only paragraphs for a whitespace-only break
+    suggestion. Word instead tracks the paragraph mark of the preceding
+    paragraph. Preserve every marker while removing these conversion wrappers.
+    """
+    suggestions = prepared.suggestions
+    for opening in list(root.iter(_MARKER)):
+        kind, identifier = opening.get("kind"), opening.get("id")
+        if opening.get("edge") != "S" or kind not in {"I", "D"}:
+            continue
+        alternatives = suggestions.get(identifier)
+        if alternatives is None:
+            continue
+        source = alternatives[1 if kind == "I" else 0]
+        if not re.fullmatch(r"[ \t]*\n[ \t]*\n\s*", source):
+            continue
+        first = opening.getparent()
+        last = first.getnext()
+        if first.tag != tag("w", "p") or last is None or last.tag != tag("w", "p"):
+            continue
+        closing = next(
+            (
+                n
+                for n in last
+                if n.tag == _MARKER
+                and n.get("kind") == kind
+                and n.get("id") == identifier
+                and n.get("edge") == "E"
+            ),
+            None,
+        )
+        if closing is None or any(
+            n.tag not in {_MARKER, tag("w", "pPr")} for p in (first, last) for n in p
+        ):
+            continue
+        before, after = first.getprevious(), last.getnext()
+        if (
+            before is None
+            or after is None
+            or any(p.tag != tag("w", "p") for p in (before, after))
+        ):
+            raise ReviewError(
+                f"Suggestion {identifier}: paragraph break needs adjacent paragraphs"
+            )
+        before.extend(n for n in list(first) if n.tag == _MARKER)
+        position = 1 if after.find("./w:pPr", NS) is not None else 0
+        for node in reversed(list(last)):
+            if node.tag == _MARKER:
+                after.insert(position, node)
+        first.getparent().remove(first)
+        last.getparent().remove(last)
 
 
 class _Finisher:
@@ -302,6 +358,7 @@ class _Finisher:
         properties: dict[str, list[etree._Element]] = {}
         objects: list[str] = []
         comment_ranges: set[str] = set()
+        paragraph_revisions: list[tuple[etree._Element, str, str]] = []
 
         def wrap(node):
             result = node
@@ -451,13 +508,9 @@ class _Finisher:
                 for targets in properties.values():
                     targets.append(parent)
                 if active and content_before:
-                    runs = _properties(_properties(parent, "pPr"), "rPr")
                     kind, identifier = active[-1]
-                    runs.append(
-                        self.revision(
-                            identifier, "ins" if kind == "I" else "del", "paragraph"
-                        )
-                    )
+                    paragraph_revisions.append((parent, kind, identifier))
+                    emitted.add((kind, identifier))
                 if (
                     had_marker
                     and parent not in self.keep_paragraphs
@@ -466,6 +519,13 @@ class _Finisher:
                     parent.getparent().remove(parent)
 
         visit(root)
+        # Apply new paragraph marks after imported property scopes, which may
+        # restore rPr from an archive without these newly authored revisions.
+        for paragraph, kind, identifier in paragraph_revisions:
+            runs = _properties(_properties(paragraph, "pPr"), "rPr")
+            runs.append(
+                self.revision(identifier, "ins" if kind == "I" else "del", "paragraph")
+            )
         if active or properties or objects or comment_ranges:
             raise ReviewError(
                 f"A review range crosses the end of a Word story: suggestions {active}, properties {list(properties)}, equations {objects}, comments {sorted(comment_ranges)}"
@@ -623,6 +683,7 @@ def finish_document(
         )
     finisher = _Finisher(prepared, directory)
     for name, root in roots.items():
+        _paragraph_break_ranges(root, prepared)
         finisher.story(root)
         if (
             name != "word/document.xml"

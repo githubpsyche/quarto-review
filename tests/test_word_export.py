@@ -252,6 +252,96 @@ def test_point_comment_survives_word_qmd_word(tmp_path):
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "change,original,proposed,kind",
+    [
+        ("{~~ ~>\n\n~~}", "First. Second.\n", "First.\nSecond.\n", "ins"),
+        ("{~~\n\n~> ~~}", "First.\nSecond.\n", "First. Second.\n", "del"),
+        ("{++\n\n++}", "First.Second.\n", "First.\nSecond.\n", "ins"),
+        ("{--\n\n--}", "First.\nSecond.\n", "First.Second.\n", "del"),
+    ],
+)
+@pytest.mark.parametrize("archived_paragraph_mark", [False, True])
+def test_standalone_paragraph_break_preserves_views_and_review(
+    tmp_path, change, original, proposed, kind, archived_paragraph_mark
+):
+    metadata = ReviewMetadata("Writer", "2026-01-01T00:00:00Z")
+    metadata.suggestions["s1"] = SuggestionMetadata("Writer", metadata.created_at)
+    metadata.comments["c1"] = CommentMetadata(
+        "Reviewer",
+        metadata.created_at,
+        status="resolved",
+        replies=(Reply("c2", "Agreed.", "Writer", metadata.created_at, "c1"),),
+    )
+    source = "{==First." + change + "{#s1}Second.==}{>>Check the flow.<<}{#c1}\n"
+    if archived_paragraph_mark:
+        native = converted(
+            prepare_render(
+                parse("First. Second.\n"), ReviewMetadata("Writer", metadata.created_at)
+            ),
+            tmp_path / "native.docx",
+        )
+        native_doc = native.xml("word/document.xml")
+        paragraph = native_doc.find(".//w:p", NS)
+        props = etree.SubElement(paragraph, tag("w", "pPr"))
+        mark_props = etree.SubElement(props, tag("w", "rPr"))
+        mark = etree.SubElement(mark_props, tag("w", "ins"))
+        for key, value in {
+            "id": "99",
+            "author": "Reviewer",
+            "date": metadata.created_at,
+        }.items():
+            mark.set(tag("w", key), value)
+        native.set_xml("word/document.xml", native_doc)
+        native.write(tmp_path / "native.docx")
+        metadata.suggestions["s2"] = SuggestionMetadata(
+            "Reviewer",
+            metadata.created_at,
+            status="accepted",
+            provenance={
+                "source": "native.docx",
+                "story": "word/document.xml",
+                "path": native_doc.getroottree().getpath(mark),
+                "kind": "ins",
+                "word_id": "99",
+            },
+        )
+        source = "[]{#s2-start}" + source.rstrip("\n") + "[]{#s2-end}{~~~>~~}{#s2}\n"
+    prepared = prepare_render(parse(source), metadata)
+    output = finish_document(
+        converted(prepared, tmp_path / "marked.docx"), prepared, tmp_path
+    )
+    root = output.xml("word/document.xml")
+    assert visible_text(root, "original").strip("\n") == original.strip("\n")
+    assert visible_text(root, "proposed").strip("\n") == proposed.strip("\n")
+    marks = root.findall(f".//w:pPr/w:rPr/w:{kind}", NS)
+    assert len(marks) == 1
+    assert marks[0].get(tag("w", "author")) == "Writer"
+    assert marks[0].get(tag("w", "date")) == metadata.created_at
+    identity = read_identity(output)
+    assert {r["id"] for r in identity["revisions"]} == {"s1"}
+    review = read_review(output)
+    assert [c.text for c in review.comments] == ["Check the flow.", "Agreed."]
+    assert all(c.resolved for c in review.comments)
+    assert review.comments[1].parent_id == review.comments[0].id
+    assert review.comments[1].anchors == review.comments[0].anchors
+    validate_package(output)
+    returned = tmp_path / "returned.docx"
+    output.write(returned)
+    imported = import_document(returned, tmp_path / "roundtrip", author="Writer")
+    again = prepare_render(
+        parse((tmp_path / "roundtrip/index.qmd").read_text()), imported
+    )
+    repeated = finish_document(
+        converted(again, tmp_path / "again.docx"), again, tmp_path / "roundtrip"
+    )
+    for view, expected in [("original", original), ("proposed", proposed)]:
+        assert visible_text(repeated.xml("word/document.xml"), view).strip(
+            "\n"
+        ) == expected.strip("\n")
+
+
+@pytest.mark.integration
 def test_paragraph_replacement_has_correct_acceptance_views(tmp_path):
     metadata = ReviewMetadata("Writer", "2026-01-01T00:00:00Z")
     metadata.suggestions["s1"] = SuggestionMetadata("Writer", metadata.created_at)
